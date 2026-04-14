@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SWOT Game</title>
+<title>SWOT-spelet</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
 /* ===== Reset & Base ===== */
@@ -166,9 +166,9 @@ input[type="text"]:focus { border-color: #5b8def; }
 .stat-card .stat-num { font-size: 2rem; font-weight: 700; }
 .stat-card .stat-lbl { font-size: .75rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
 .stat-s .stat-num { color: #27ae60; }
-.stat-w .stat-num { color: #e74c3c; }
+.stat-w .stat-num { color: #f39c12; }
 .stat-o .stat-num { color: #2980b9; }
-.stat-t .stat-num { color: #f39c12; }
+.stat-t .stat-num { color: #e74c3c; }
 
 /* Animation panel */
 #animation-panel {
@@ -177,7 +177,7 @@ input[type="text"]:focus { border-color: #5b8def; }
   margin-bottom: 24px;
   overflow: hidden;
   position: relative;
-  height: 220px;
+  height: 260px;
   border: 1px solid #222;
 }
 
@@ -214,9 +214,9 @@ input[type="text"]:focus { border-color: #5b8def; }
   color: #fff;
 }
 .feed-badge.S { background: #27ae60; }
-.feed-badge.W { background: #e74c3c; }
+.feed-badge.W { background: #f39c12; }
 .feed-badge.O { background: #2980b9; }
-.feed-badge.T { background: #f39c12; }
+.feed-badge.T { background: #e74c3c; }
 .feed-badge.pending { background: #555; }
 .feed-text { flex: 1; font-size: .95rem; line-height: 1.4; }
 .feed-sub { font-size: .75rem; color: #888; margin-top: 2px; }
@@ -236,7 +236,7 @@ input[type="text"]:focus { border-color: #5b8def; }
 @media (max-width: 800px) {
   .admin-top { grid-template-columns: 1fr; }
   .stats-panel { grid-template-columns: 1fr 1fr; }
-  #animation-panel { height: 180px; }
+  #animation-panel { height: 220px; }
 }
 </style>
 </head>
@@ -245,14 +245,14 @@ input[type="text"]:focus { border-color: #5b8def; }
 <!-- ===== PARTICIPANT PAGE ===== -->
 <div id="participant-page">
   <h1>SWOT Workshop</h1>
-  <p class="subtitle">Share your insight</p>
+  <p class="subtitle">Dela din insikt</p>
   <div id="participant-timer"></div>
   <div id="inactive-msg" class="inactive-message" style="display:none;">
-    Waiting for the session to start...
+    Väntar på att sessionen ska starta...
   </div>
   <form id="submit-form" style="display:none;">
-    <input type="text" id="answer-input" placeholder="Type your idea, strength, weakness, opportunity or threat..." maxlength="500" autocomplete="off" />
-    <button type="submit" id="submit-btn">Submit</button>
+    <input type="text" id="answer-input" placeholder="Skriv din idé, styrka, svaghet, möjlighet eller hot..." maxlength="500" autocomplete="off" />
+    <button type="submit" id="submit-btn">Skicka</button>
   </form>
   <div id="confirmation"></div>
 </div>
@@ -260,17 +260,17 @@ input[type="text"]:focus { border-color: #5b8def; }
 <!-- ===== ADMIN PAGE ===== -->
 <div id="admin-page">
   <div class="admin-header">
-    <h1>SWOT Game — Admin</h1>
+    <h1>SWOT-spelet — Admin</h1>
     <div class="admin-controls">
-      <button id="start-btn">Start Session</button>
-      <button id="stop-btn">Stop Session</button>
-      <button id="export-btn">Download Excel</button>
+      <button id="start-btn">Starta session</button>
+      <button id="stop-btn">Stoppa session</button>
+      <button id="export-btn">Ladda ner Excel</button>
     </div>
   </div>
 
   <div class="admin-top">
     <div class="qr-panel">
-      <img id="qr-img" alt="QR Code" width="200" height="200" />
+      <img id="qr-img" alt="QR-kod" width="200" height="200" />
       <div class="qr-url" id="qr-url"></div>
     </div>
     <div class="timer-panel">
@@ -282,13 +282,13 @@ input[type="text"]:focus { border-color: #5b8def; }
         </svg>
         <div class="timer-text" id="timer-display">--</div>
       </div>
-      <div class="timer-label" id="timer-label">Waiting for first submission</div>
+      <div class="timer-label" id="timer-label">Väntar på första svaret</div>
     </div>
     <div class="stats-panel">
-      <div class="stat-card stat-s"><div class="stat-num" id="count-s">0</div><div class="stat-lbl">Strengths</div></div>
-      <div class="stat-card stat-w"><div class="stat-num" id="count-w">0</div><div class="stat-lbl">Weaknesses</div></div>
-      <div class="stat-card stat-o"><div class="stat-num" id="count-o">0</div><div class="stat-lbl">Opportunities</div></div>
-      <div class="stat-card stat-t"><div class="stat-num" id="count-t">0</div><div class="stat-lbl">Threats</div></div>
+      <div class="stat-card stat-s"><div class="stat-num" id="count-s">0</div><div class="stat-lbl">Styrkor</div></div>
+      <div class="stat-card stat-w"><div class="stat-num" id="count-w">0</div><div class="stat-lbl">Svagheter</div></div>
+      <div class="stat-card stat-o"><div class="stat-num" id="count-o">0</div><div class="stat-lbl">Möjligheter</div></div>
+      <div class="stat-card stat-t"><div class="stat-num" id="count-t">0</div><div class="stat-lbl">Hot</div></div>
     </div>
   </div>
 
@@ -299,8 +299,8 @@ input[type="text"]:focus { border-color: #5b8def; }
 
   <!-- Live Feed -->
   <div class="feed-panel">
-    <h3>Live Feed</h3>
-    <div id="feed-list"><div class="feed-empty">No submissions yet</div></div>
+    <h3>Inflöde</h3>
+    <div id="feed-list"><div class="feed-empty">Inga svar ännu</div></div>
   </div>
 </div>
 
@@ -338,14 +338,14 @@ if (!isAdmin) {
       const expired = timerStarted && timeRemaining <= 0;
       if (expired) {
         form.style.display = 'none';
-        pTimer.textContent = 'Time is up!';
+        pTimer.textContent = 'Tiden är ute!';
         pTimer.style.color = '#e74c3c';
       } else {
         form.style.display = 'flex';
         if (timerStarted) {
           const m = Math.floor(timeRemaining / 60);
           const s = String(timeRemaining % 60).padStart(2, '0');
-          pTimer.textContent = `Time remaining: ${m}:${s}`;
+          pTimer.textContent = `Tid kvar: ${m}:${s}`;
           pTimer.style.color = timeRemaining <= 30 ? '#e74c3c' : '#aaa';
         } else {
           pTimer.textContent = '';
@@ -369,15 +369,15 @@ if (!isAdmin) {
       });
       const data = await res.json();
       if (res.ok) {
-        conf.textContent = 'Submitted! You can submit another.';
+        conf.textContent = 'Inskickat! Du kan skicka ett till.';
         conf.className = 'success';
         input.value = '';
       } else {
-        conf.textContent = data.error || 'Submission failed';
+        conf.textContent = data.error || 'Inskickning misslyckades';
         conf.className = 'error';
       }
     } catch {
-      conf.textContent = 'Network error. Try again.';
+      conf.textContent = 'Nätverksfel. Försök igen.';
       conf.className = 'error';
     }
     btn.disabled = false;
@@ -407,7 +407,7 @@ if (isAdmin) {
   const timerDisplay = document.getElementById('timer-display');
   const timerRing = document.getElementById('timer-ring');
   const timerLabel = document.getElementById('timer-label');
-  const circumference = 2 * Math.PI * 70; // ~439.82
+  const circumference = 2 * Math.PI * 70;
 
   // Load QR code
   fetch('/api/qr').then(r => r.json()).then(d => {
@@ -424,14 +424,14 @@ if (isAdmin) {
       timerDisplay.textContent = '--';
       timerRing.style.strokeDashoffset = '0';
       timerRing.style.stroke = '#5b8def';
-      timerLabel.textContent = 'Session inactive';
+      timerLabel.textContent = 'Session inaktiv';
       return;
     }
     if (!timerStarted) {
       timerDisplay.textContent = formatTime(totalDuration);
       timerRing.style.strokeDashoffset = '0';
       timerRing.style.stroke = '#5b8def';
-      timerLabel.textContent = 'Waiting for first submission';
+      timerLabel.textContent = 'Väntar på första svaret';
       return;
     }
     timerDisplay.textContent = formatTime(timeRemaining);
@@ -439,13 +439,13 @@ if (isAdmin) {
     timerRing.style.strokeDashoffset = String(pct * circumference);
     if (timeRemaining <= 0) {
       timerRing.style.stroke = '#e74c3c';
-      timerLabel.textContent = 'Time is up!';
+      timerLabel.textContent = 'Tiden är ute!';
     } else if (timeRemaining <= 30) {
       timerRing.style.stroke = '#e74c3c';
-      timerLabel.textContent = 'Hurry up!';
+      timerLabel.textContent = 'Skynda!';
     } else {
       timerRing.style.stroke = '#5b8def';
-      timerLabel.textContent = 'Timer running';
+      timerLabel.textContent = 'Timer igång';
     }
   }
 
@@ -461,11 +461,9 @@ if (isAdmin) {
   }
 
   function addFeedItem(id, text, classification) {
-    // Remove empty placeholder
     const empty = feedList.querySelector('.feed-empty');
     if (empty) empty.remove();
 
-    // Check if item already exists (update it)
     let existing = document.getElementById('feed-' + id);
     if (existing) {
       if (classification) {
@@ -483,7 +481,7 @@ if (isAdmin) {
     div.id = 'feed-' + id;
     const badge = classification ? classification.swot : '?';
     const badgeClass = classification ? classification.swot : 'pending';
-    const subText = classification ? classification.subcategory + (classification.reason ? ' — ' + classification.reason : '') : 'Classifying...';
+    const subText = classification ? classification.subcategory + (classification.reason ? ' — ' + classification.reason : '') : 'Klassificerar...';
     div.innerHTML = `<div class="feed-badge ${badgeClass}">${badge}</div><div><div class="feed-text">${escapeHtml(text)}</div><div class="feed-sub">${escapeHtml(subText)}</div></div>`;
     feedList.prepend(div);
   }
@@ -500,7 +498,6 @@ if (isAdmin) {
     timerStarted = s.timerStarted;
     timeRemaining = s.timeRemaining;
     totalDuration = s.totalDuration;
-    // Reset counts
     counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
     s.submissions.forEach((sub) => {
       addFeedItem(sub.id, sub.text, sub.classification);
@@ -515,7 +512,7 @@ if (isAdmin) {
     timerStarted = false;
     timeRemaining = 0;
     totalDuration = d.totalDuration;
-    feedList.innerHTML = '<div class="feed-empty">No submissions yet</div>';
+    feedList.innerHTML = '<div class="feed-empty">Inga svar ännu</div>';
     counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
     updateCounts();
     updateTimerUI();
@@ -551,8 +548,7 @@ if (isAdmin) {
     addFeedItem(d.id, d.text, d.classification);
     counts[d.classification.swot]++;
     updateCounts();
-    // Trigger animation
-    animatePostman(d.text, d.classification.swot);
+    triggerDelivery(d.text, d.classification.swot);
   });
 
   // ===== PIXEL AGENT ANIMATION =====
@@ -568,37 +564,65 @@ if (isAdmin) {
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  // SWOT Agent positions (will be computed)
-  const swotColors = { S: '#27ae60', W: '#e74c3c', O: '#2980b9', T: '#f39c12' };
-  const swotLabels = { S: 'Strengths', W: 'Weaknesses', O: 'Opportunities', T: 'Threats' };
+  // Colors: S=green, W=orange, O=blue, T=red
+  const swotColors = { S: '#27ae60', W: '#f39c12', O: '#2980b9', T: '#e74c3c' };
+  const swotLabels = { S: 'Styrkor', W: 'Svagheter', O: 'Möjligheter', T: 'Hot' };
+  const agentLetters = ['S', 'W', 'O', 'T'];
+
+  // Agent state (persistent across frames)
   const agents = {};
-  const letters = ['S', 'W', 'O', 'T'];
+  agentLetters.forEach((l, i) => {
+    agents[l] = { letter: l, color: swotColors[l], pile: 0, bobOffset: i * 0.7, working: 0 };
+  });
 
-  function getAgentPositions() {
+  // Postman state — always visible, idles at center
+  const postman = { x: 0, y: 0, state: 'idle', walkPhase: 0 };
+  const deliveryQueue = [];
+  let activeDelivery = null;
+
+  function triggerDelivery(text, target) {
+    deliveryQueue.push({ text, target });
+  }
+
+  // Compute positions based on canvas size
+  function getPositions() {
+    const groundY = cH - 36;
+    const agentY = groundY - 28;
     const spacing = cW / 5;
-    letters.forEach((l, i) => {
-      agents[l] = {
-        x: spacing * (i + 1),
-        y: cH - 50,
-        letter: l,
-        color: swotColors[l],
-        pile: 0,
-        bobOffset: i * 0.7,
-      };
+    agentLetters.forEach((l, i) => {
+      agents[l].x = spacing * (i + 1);
+      agents[l].y = agentY;
     });
-  }
-  getAgentPositions();
-
-  // Postman
-  const postmanQueue = [];
-  let activePostman = null;
-
-  function animatePostman(text, target) {
-    postmanQueue.push({ text, target });
+    // Postman home = center bottom
+    if (postman.state === 'idle') {
+      postman.x = cW / 2;
+      postman.y = agentY + 12;
+    }
   }
 
-  // Draw pixel character
-  function drawAgent(x, y, color, letter, scale, bob) {
+  // --- Drawing helpers ---
+
+  function drawDesk(x, y, color) {
+    // Desktop surface
+    ctx.fillStyle = '#2a2530';
+    ctx.beginPath();
+    ctx.roundRect(x - 28, y + 2, 56, 8, 3);
+    ctx.fill();
+    // Front panel
+    ctx.fillStyle = '#1e1a24';
+    ctx.fillRect(x - 26, y + 10, 52, 14);
+    // Color strip on front
+    ctx.fillStyle = color;
+    ctx.globalAlpha = 0.5;
+    ctx.fillRect(x - 26, y + 10, 52, 3);
+    ctx.globalAlpha = 1;
+    // Legs
+    ctx.fillStyle = '#1e1a24';
+    ctx.fillRect(x - 24, y + 24, 4, 8);
+    ctx.fillRect(x + 20, y + 24, 4, 8);
+  }
+
+  function drawAgent(x, y, color, letter, scale, bob, working) {
     const s = scale || 1;
     const by = Math.sin(bob) * 3;
     const cx = x;
@@ -615,16 +639,35 @@ if (isAdmin) {
     ctx.beginPath();
     ctx.arc(cx, cy - 36*s, 10*s, 0, Math.PI * 2);
     ctx.fill();
-    // Eyes
+
+    // Eyes — blink or look down when working
     ctx.fillStyle = '#222';
-    ctx.fillRect(cx - 4*s, cy - 39*s, 3*s, 3*s);
-    ctx.fillRect(cx + 2*s, cy - 39*s, 3*s, 3*s);
+    if (working > 0) {
+      // Looking down / typing — smaller eyes, shifted down
+      ctx.fillRect(cx - 4*s, cy - 37*s, 3*s, 2*s);
+      ctx.fillRect(cx + 2*s, cy - 37*s, 3*s, 2*s);
+    } else {
+      ctx.fillRect(cx - 4*s, cy - 39*s, 3*s, 3*s);
+      ctx.fillRect(cx + 2*s, cy - 39*s, 3*s, 3*s);
+    }
+
     // Letter on body
     ctx.fillStyle = '#fff';
     ctx.font = `bold ${14*s}px monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(letter, cx, cy - 14*s);
+
+    // Arms — typing animation when working
+    if (working > 0) {
+      const armBob = Math.sin(working * 12) * 2;
+      ctx.fillStyle = color;
+      // Left arm reaching to desk
+      ctx.fillRect(cx - 16*s, cy - 12*s + armBob, 5*s, 14*s);
+      // Right arm
+      ctx.fillRect(cx + 11*s, cy - 12*s - armBob, 5*s, 14*s);
+    }
+
     // Legs
     ctx.fillStyle = color;
     ctx.fillRect(cx - 8*s, cy, 6*s, 10*s);
@@ -636,8 +679,8 @@ if (isAdmin) {
     ctx.restore();
   }
 
-  function drawPostman(x, y, label, walkPhase) {
-    const bob = Math.sin(walkPhase * 8) * 2;
+  function drawPostmanChar(x, y, walkPhase, carrying) {
+    const bob = postman.state === 'idle' ? Math.sin(walkPhase * 1.5) * 2 : Math.sin(walkPhase * 8) * 3;
     ctx.save();
     // Body
     ctx.fillStyle = '#8e44ad';
@@ -653,64 +696,93 @@ if (isAdmin) {
     ctx.fillStyle = '#8e44ad';
     ctx.fillRect(x - 9, y - 39 + bob, 18, 5);
     ctx.fillRect(x - 6, y - 43 + bob, 12, 5);
+    // Hat badge
+    ctx.fillStyle = '#d4a0f5';
+    ctx.fillRect(x - 3, y - 42 + bob, 6, 3);
     // Eyes
     ctx.fillStyle = '#222';
     ctx.fillRect(x - 3, y - 32 + bob, 2, 2);
     ctx.fillRect(x + 2, y - 32 + bob, 2, 2);
-    // Legs (walk animation)
-    const legSwing = Math.sin(walkPhase * 8) * 5;
-    ctx.fillStyle = '#6c3483';
-    ctx.fillRect(x - 6, y + bob, 5, 8);
-    ctx.fillRect(x + 1, y + bob, 5, 8);
-    // Letter/envelope in hand
-    ctx.fillStyle = '#f5f5dc';
-    ctx.fillRect(x + 10, y - 18 + bob, 18, 12);
-    ctx.strokeStyle = '#bbb';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x + 10, y - 18 + bob, 18, 12);
-    // Envelope flap
-    ctx.beginPath();
-    ctx.moveTo(x + 10, y - 18 + bob);
-    ctx.lineTo(x + 19, y - 11 + bob);
-    ctx.lineTo(x + 28, y - 18 + bob);
-    ctx.strokeStyle = '#bbb';
-    ctx.stroke();
-    // Label snippet on envelope
-    ctx.fillStyle = '#666';
-    ctx.font = '7px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(label.slice(0, 6), x + 19, y - 8 + bob);
+    // Legs with walk animation
+    if (postman.state !== 'idle') {
+      const legSwing = Math.sin(walkPhase * 10) * 4;
+      ctx.fillStyle = '#6c3483';
+      ctx.save();
+      ctx.translate(x - 4, y + bob);
+      ctx.rotate(legSwing * 0.05);
+      ctx.fillRect(-2, 0, 5, 10);
+      ctx.restore();
+      ctx.save();
+      ctx.translate(x + 4, y + bob);
+      ctx.rotate(-legSwing * 0.05);
+      ctx.fillRect(-3, 0, 5, 10);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#6c3483';
+      ctx.fillRect(x - 6, y + bob, 5, 8);
+      ctx.fillRect(x + 1, y + bob, 5, 8);
+    }
+    // Feet
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x - 8, y + bob + (postman.state !== 'idle' ? 9 : 8), 7, 3);
+    ctx.fillRect(x + 1, y + bob + (postman.state !== 'idle' ? 9 : 8), 7, 3);
+
+    // Envelope in hand (only if carrying)
+    if (carrying) {
+      ctx.fillStyle = '#f5f5dc';
+      ctx.fillRect(x + 11, y - 18 + bob, 20, 14);
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x + 11, y - 18 + bob, 20, 14);
+      // Envelope flap
+      ctx.beginPath();
+      ctx.moveTo(x + 11, y - 18 + bob);
+      ctx.lineTo(x + 21, y - 10 + bob);
+      ctx.lineTo(x + 31, y - 18 + bob);
+      ctx.strokeStyle = '#ccc';
+      ctx.stroke();
+      // Text snippet
+      ctx.fillStyle = '#888';
+      ctx.font = '7px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(carrying.slice(0, 6), x + 21, y - 7 + bob);
+    }
+
+    // "Brevbärare" label when idle
+    if (postman.state === 'idle') {
+      ctx.fillStyle = '#555';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Brevbärare', x, y + 22);
+    }
     ctx.restore();
   }
 
-  // Pile of letters next to agent
   function drawPile(agent) {
     if (agent.pile <= 0) return;
     const count = Math.min(agent.pile, 15);
+    const baseY = agent.y + 34; // on the desk
     for (let i = 0; i < count; i++) {
-      const ox = (i % 5) * 14 - 28;
-      const oy = -Math.floor(i / 5) * 10;
+      const ox = (i % 4) * 12 - 18;
+      const oy = -Math.floor(i / 4) * 8;
       ctx.fillStyle = '#f5f5dc';
-      ctx.fillRect(agent.x + ox - 5, agent.y + 10 + oy, 14, 9);
+      ctx.fillRect(agent.x + ox - 3, baseY + oy - 18, 12, 8);
       ctx.strokeStyle = agent.color;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(agent.x + ox - 5, agent.y + 10 + oy, 14, 9);
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(agent.x + ox - 3, baseY + oy - 18, 12, 8);
     }
-    // Count badge
-    if (agent.pile > 0) {
-      ctx.fillStyle = agent.color;
-      ctx.font = 'bold 11px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(agent.pile + ' items', agent.x, agent.y + 36);
-    }
+    // Count
+    ctx.fillStyle = agent.color;
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(agent.pile + ' st', agent.x, agent.y + 52);
   }
 
-  // Label under agents
   function drawLabel(agent) {
-    ctx.fillStyle = '#555';
+    ctx.fillStyle = '#666';
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(swotLabels[agent.letter], agent.x, agent.y + 48);
+    ctx.fillText(swotLabels[agent.letter], agent.x, agent.y + 64);
   }
 
   // Main animation loop
@@ -718,54 +790,91 @@ if (isAdmin) {
   function draw() {
     animTime += 0.016;
     ctx.clearRect(0, 0, cW, cH);
-    getAgentPositions();
+    getPositions();
 
-    // Ground line
+    // Ground
+    ctx.fillStyle = '#1a1d27';
+    ctx.fillRect(0, cH - 36, cW, 36);
     ctx.strokeStyle = '#2a2d37';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, cH - 32);
-    ctx.lineTo(cW, cH - 32);
+    ctx.moveTo(0, cH - 36);
+    ctx.lineTo(cW, cH - 36);
     ctx.stroke();
 
-    // Draw SWOT agents
-    letters.forEach((l) => {
+    // Draw each SWOT agent with desk
+    agentLetters.forEach((l) => {
       const a = agents[l];
+      // Decay working timer
+      if (a.working > 0) a.working = Math.max(0, a.working - 0.016);
+
+      drawDesk(a.x, a.y + 2, a.color);
       drawPile(a);
-      drawAgent(a.x, a.y - 14, a.color, l, 1.1, animTime + a.bobOffset);
+
+      const bobSpeed = a.working > 0 ? animTime * 3 : animTime;
+      drawAgent(a.x, a.y - 14, a.color, l, 1.0, bobSpeed + a.bobOffset, a.working);
       drawLabel(a);
     });
 
-    // Process postman queue
-    if (!activePostman && postmanQueue.length > 0) {
-      const job = postmanQueue.shift();
+    // --- Postman delivery logic ---
+    if (postman.state === 'idle' && deliveryQueue.length > 0) {
+      const job = deliveryQueue.shift();
       const target = agents[job.target];
-      activePostman = {
-        startX: 30,
-        startY: cH - 64,
-        endX: target.x,
-        endY: target.y - 14,
+      activeDelivery = {
         text: job.text,
         target: job.target,
+        // Phase 1: walk from home to target agent
+        startX: postman.x,
+        startY: postman.y,
+        endX: target.x,
+        endY: target.y + 12,
         progress: 0,
+        phase: 'deliver', // deliver, then return
       };
+      postman.state = 'walking';
     }
 
-    if (activePostman) {
-      activePostman.progress += 0.025;
-      if (activePostman.progress >= 1) {
-        // Delivered
-        agents[activePostman.target].pile++;
-        activePostman = null;
-      } else {
-        const p = activePostman.progress;
-        // Ease in-out
+    if (activeDelivery) {
+      activeDelivery.progress += 0.018;
+      postman.walkPhase += 0.016;
+
+      if (activeDelivery.progress >= 1) {
+        if (activeDelivery.phase === 'deliver') {
+          // Delivered! Increment pile, trigger working animation
+          agents[activeDelivery.target].pile++;
+          agents[activeDelivery.target].working = 2.0; // 2 seconds of working anim
+
+          // Now return to center
+          activeDelivery.phase = 'return';
+          activeDelivery.startX = activeDelivery.endX;
+          activeDelivery.startY = activeDelivery.endY;
+          activeDelivery.endX = cW / 2;
+          activeDelivery.endY = agents[agentLetters[0]].y + 12;
+          activeDelivery.progress = 0;
+        } else {
+          // Returned home
+          postman.state = 'idle';
+          postman.x = cW / 2;
+          postman.y = agents[agentLetters[0]].y + 12;
+          activeDelivery = null;
+        }
+      }
+
+      if (activeDelivery) {
+        const p = activeDelivery.progress;
         const ep = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
-        const px = activePostman.startX + (activePostman.endX - activePostman.startX) * ep;
-        const py = activePostman.startY + (activePostman.endY - activePostman.startY) * ep - Math.sin(ep * Math.PI) * 30;
-        drawPostman(px, py, activePostman.text, activePostman.progress);
+        postman.x = activeDelivery.startX + (activeDelivery.endX - activeDelivery.startX) * ep;
+        postman.y = activeDelivery.startY + (activeDelivery.endY - activeDelivery.startY) * ep;
+        // Arc only on deliver phase
+        if (activeDelivery.phase === 'deliver') {
+          postman.y -= Math.sin(ep * Math.PI) * 25;
+        }
       }
     }
+
+    // Always draw postman
+    const carrying = activeDelivery && activeDelivery.phase === 'deliver' ? activeDelivery.text : null;
+    drawPostmanChar(postman.x, postman.y, postman.state === 'idle' ? animTime : postman.walkPhase, carrying);
 
     requestAnimationFrame(draw);
   }

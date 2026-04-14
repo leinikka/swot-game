@@ -48,10 +48,10 @@ Configured via `.env`:
 ### Color Scheme
 
 Consistent across UI, animation, and Excel export:
-- S (Strengths): `#27ae60` green
-- W (Weaknesses): `#e74c3c` red
-- O (Opportunities): `#2980b9` blue
-- T (Threats): `#f39c12` orange
+- S (Styrkor): `#27ae60` green
+- W (Svagheter): `#f39c12` orange
+- O (Möjligheter): `#2980b9` blue
+- T (Hot): `#e74c3c` red
 
 ### AI Classification
 

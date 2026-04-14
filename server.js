@@ -100,20 +100,20 @@ async function exportToExcel() {
   const workbook = new ExcelJS.Workbook();
 
   // Summary sheet
-  const summary = workbook.addWorksheet('Summary');
+  const summary = workbook.addWorksheet('Sammanfattning');
   summary.columns = [
-    { header: 'Category', key: 'cat', width: 15 },
-    { header: 'Count', key: 'count', width: 10 },
+    { header: 'Kategori', key: 'cat', width: 15 },
+    { header: 'Antal', key: 'count', width: 10 },
   ];
   const counts = { S: 0, W: 0, O: 0, T: 0 };
   session.submissions.forEach((s) => {
     if (s.classification) counts[s.classification.swot]++;
   });
-  summary.addRow({ cat: 'Strengths', count: counts.S });
-  summary.addRow({ cat: 'Weaknesses', count: counts.W });
-  summary.addRow({ cat: 'Opportunities', count: counts.O });
-  summary.addRow({ cat: 'Threats', count: counts.T });
-  summary.addRow({ cat: 'Total', count: session.submissions.length });
+  summary.addRow({ cat: 'Styrkor', count: counts.S });
+  summary.addRow({ cat: 'Svagheter', count: counts.W });
+  summary.addRow({ cat: 'Möjligheter', count: counts.O });
+  summary.addRow({ cat: 'Hot', count: counts.T });
+  summary.addRow({ cat: 'Totalt', count: session.submissions.length });
 
   // Style summary header
   summary.getRow(1).eachCell((cell) => {
@@ -122,18 +122,18 @@ async function exportToExcel() {
   });
 
   // Detail sheet
-  const detail = workbook.addWorksheet('Submissions');
+  const detail = workbook.addWorksheet('Alla svar');
   detail.columns = [
     { header: '#', key: 'num', width: 5 },
     { header: 'Text', key: 'text', width: 50 },
     { header: 'SWOT', key: 'swot', width: 8 },
-    { header: 'Subcategory', key: 'sub', width: 15 },
-    { header: 'Reason', key: 'reason', width: 40 },
-    { header: 'Time', key: 'time', width: 22 },
+    { header: 'Underkategori', key: 'sub', width: 15 },
+    { header: 'Motivering', key: 'reason', width: 40 },
+    { header: 'Tid', key: 'time', width: 22 },
   ];
 
   const swotColors = {
-    S: 'FF27AE60', W: 'FFE74C3C', O: 'FF2980B9', T: 'FFF39C12',
+    S: 'FF27AE60', W: 'FFF39C12', O: 'FF2980B9', T: 'FFE74C3C',
   };
 
   session.submissions.forEach((s, i) => {
@@ -159,13 +159,13 @@ async function exportToExcel() {
   });
 
   // Per-category sheets
-  for (const [letter, label] of [['S', 'Strengths'], ['W', 'Weaknesses'], ['O', 'Opportunities'], ['T', 'Threats']]) {
+  for (const [letter, label] of [['S', 'Styrkor'], ['W', 'Svagheter'], ['O', 'Möjligheter'], ['T', 'Hot']]) {
     const ws = workbook.addWorksheet(label);
     ws.columns = [
       { header: '#', key: 'num', width: 5 },
       { header: 'Text', key: 'text', width: 50 },
-      { header: 'Subcategory', key: 'sub', width: 15 },
-      { header: 'Reason', key: 'reason', width: 40 },
+      { header: 'Underkategori', key: 'sub', width: 15 },
+      { header: 'Motivering', key: 'reason', width: 40 },
     ];
     ws.getRow(1).eachCell((cell) => {
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
