@@ -1,4 +1,5 @@
 node_modules/
 .env
 *.xlsx
+.DS_Store
 CLAUDE.md
