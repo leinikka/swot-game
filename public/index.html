@@ -170,15 +170,280 @@ input[type="text"]:focus { border-color: #5b8def; }
 .stat-o .stat-num { color: #2980b9; }
 .stat-t .stat-num { color: #e74c3c; }
 
-/* Animation panel */
+/* ===== Animation Panel ===== */
 #animation-panel {
   background: #151820;
   border-radius: 12px;
   margin-bottom: 24px;
   overflow: hidden;
   position: relative;
-  height: 260px;
+  height: 340px;
   border: 1px solid #222;
+}
+
+/* --- Mailbox (center) --- */
+.mailbox {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+}
+.mailbox-icon {
+  width: 52px;
+  height: 52px;
+  background: #2a2d37;
+  border: 2px solid #3a3d47;
+  border-radius: 8px 8px 4px 4px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mailbox-icon::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 10px;
+  background: #3a3d47;
+  border-radius: 4px 4px 0 0;
+}
+.mailbox-flag {
+  position: absolute;
+  right: -10px;
+  top: -4px;
+  width: 6px;
+  height: 20px;
+  background: #e74c3c;
+  border-radius: 2px;
+  transition: background .3s;
+}
+.mailbox-flag.has-mail { background: #27ae60; }
+.mailbox-flag::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 6px;
+  width: 10px;
+  height: 8px;
+  background: inherit;
+  border-radius: 0 2px 2px 0;
+}
+.mailbox-label {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Envelope stack in mailbox */
+.envelope-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  position: absolute;
+  bottom: 58px;
+  gap: 2px;
+}
+.env-in-stack {
+  width: 36px;
+  height: 22px;
+  background: #f5f5dc;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  position: relative;
+  animation: envDrop .3s ease;
+}
+.env-in-stack::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 10px solid #e8e0c8;
+}
+@keyframes envDrop {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Agent Home Base (corners) --- */
+.agent-home {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+.agent-home.corner-tl { top: 16px; left: 24px; }
+.agent-home.corner-tr { top: 16px; right: 24px; }
+.agent-home.corner-bl { bottom: 16px; left: 24px; }
+.agent-home.corner-br { bottom: 16px; right: 24px; }
+
+.agent-counter {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 4px;
+  min-height: 24px;
+}
+.agent-label {
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* Agent character (pixel-art via CSS) */
+.agent-char {
+  width: 40px;
+  height: 56px;
+  position: relative;
+}
+.agent-char .a-body {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.agent-char .a-letter {
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  font-family: monospace;
+}
+.agent-char .a-head {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ddd;
+}
+.agent-char .a-eye {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #222;
+  top: 7px;
+}
+.agent-char .a-eye.left { left: 5px; }
+.agent-char .a-eye.right { right: 5px; }
+.agent-char .a-legs {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 14px;
+}
+.agent-char .a-leg {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  height: 10px;
+  border-radius: 0 0 2px 2px;
+}
+.agent-char .a-leg.left { left: 1px; }
+.agent-char .a-leg.right { right: 1px; }
+.agent-char .a-foot {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 4px;
+  background: #333;
+  border-radius: 1px;
+}
+.agent-char .a-foot.left { left: 0; }
+.agent-char .a-foot.right { right: 0; }
+
+/* Envelope stack at home base */
+.home-stack {
+  margin-top: 4px;
+  width: 32px;
+  height: 20px;
+  position: relative;
+  display: none;
+}
+.home-stack.has-mail { display: block; }
+.home-stack-env {
+  position: absolute;
+  width: 32px;
+  height: 18px;
+  background: #f5f5dc;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  bottom: 0;
+}
+.home-stack-env::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 8px solid #e8e0c8;
+}
+.home-stack-env:nth-child(2) { bottom: 3px; left: 2px; }
+.home-stack-env:nth-child(3) { bottom: 6px; left: -1px; }
+
+/* --- Walking Agent (animated clone) --- */
+.walking-agent {
+  position: absolute;
+  z-index: 20;
+  transition: none;
+  pointer-events: none;
+}
+.walking-agent .a-leg.left,
+.walking-agent .a-leg.right {
+  animation: legSwing .3s ease-in-out infinite alternate;
+}
+.walking-agent .a-leg.right {
+  animation-delay: .15s;
+}
+@keyframes legSwing {
+  from { transform: rotate(-12deg); }
+  to { transform: rotate(12deg); }
+}
+.walking-agent.face-left .agent-char {
+  transform: scaleX(-1);
+}
+
+/* Carrying envelope */
+.walking-env {
+  position: absolute;
+  top: 12px;
+  width: 24px;
+  height: 16px;
+  background: #f5f5dc;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+.walking-agent.face-left .walking-env { right: -8px; }
+.walking-agent:not(.face-left) .walking-env { left: 34px; }
+.walking-env::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 7px solid #e8e0c8;
 }
 
 /* Feed */
@@ -199,6 +464,11 @@ input[type="text"]:focus { border-color: #5b8def; }
   margin-bottom: 6px;
   background: #12141c;
   animation: feedIn .3s ease;
+  transition: opacity .4s, transform .4s;
+}
+.feed-item.removing {
+  opacity: 0;
+  transform: translateX(30px) scale(.95);
 }
 @keyframes feedIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 .feed-badge {
@@ -232,11 +502,21 @@ input[type="text"]:focus { border-color: #5b8def; }
   font-size: 1.1rem;
 }
 
+/* Idle bob animation for agents at home */
+@keyframes idleBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.agent-home .agent-char { animation: idleBob 2s ease-in-out infinite; }
+.agent-home.corner-tr .agent-char { animation-delay: .5s; }
+.agent-home.corner-bl .agent-char { animation-delay: 1s; }
+.agent-home.corner-br .agent-char { animation-delay: 1.5s; }
+
 /* Mobile */
 @media (max-width: 800px) {
   .admin-top { grid-template-columns: 1fr; }
   .stats-panel { grid-template-columns: 1fr 1fr; }
-  #animation-panel { height: 220px; }
+  #animation-panel { height: 280px; }
 }
 </style>
 </head>
@@ -292,9 +572,100 @@ input[type="text"]:focus { border-color: #5b8def; }
     </div>
   </div>
 
-  <!-- Pixel Agent Animation -->
+  <!-- Animation Panel -->
   <div id="animation-panel">
-    <canvas id="agent-canvas"></canvas>
+    <!-- Agent S — top-left -->
+    <div class="agent-home corner-tl" id="home-S">
+      <div class="agent-counter" id="counter-S" style="color:#27ae60"></div>
+      <div class="agent-char" id="char-S">
+        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
+        <div class="a-body" style="background:#27ae60"><span class="a-letter">S</span></div>
+        <div class="a-legs">
+          <div class="a-leg left" style="background:#27ae60"></div>
+          <div class="a-leg right" style="background:#27ae60"></div>
+          <div class="a-foot left"></div>
+          <div class="a-foot right"></div>
+        </div>
+      </div>
+      <div class="agent-label">Styrkor</div>
+      <div class="home-stack" id="stack-S">
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+      </div>
+    </div>
+
+    <!-- Agent W — top-right -->
+    <div class="agent-home corner-tr" id="home-W">
+      <div class="agent-counter" id="counter-W" style="color:#f39c12"></div>
+      <div class="agent-char" id="char-W">
+        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
+        <div class="a-body" style="background:#f39c12"><span class="a-letter">W</span></div>
+        <div class="a-legs">
+          <div class="a-leg left" style="background:#f39c12"></div>
+          <div class="a-leg right" style="background:#f39c12"></div>
+          <div class="a-foot left"></div>
+          <div class="a-foot right"></div>
+        </div>
+      </div>
+      <div class="agent-label">Svagheter</div>
+      <div class="home-stack" id="stack-W">
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+      </div>
+    </div>
+
+    <!-- Agent O — bottom-left -->
+    <div class="agent-home corner-bl" id="home-O">
+      <div class="agent-counter" id="counter-O" style="color:#2980b9"></div>
+      <div class="agent-char" id="char-O">
+        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
+        <div class="a-body" style="background:#2980b9"><span class="a-letter">O</span></div>
+        <div class="a-legs">
+          <div class="a-leg left" style="background:#2980b9"></div>
+          <div class="a-leg right" style="background:#2980b9"></div>
+          <div class="a-foot left"></div>
+          <div class="a-foot right"></div>
+        </div>
+      </div>
+      <div class="agent-label">Möjligheter</div>
+      <div class="home-stack" id="stack-O">
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+      </div>
+    </div>
+
+    <!-- Agent T — bottom-right -->
+    <div class="agent-home corner-br" id="home-T">
+      <div class="agent-counter" id="counter-T" style="color:#e74c3c"></div>
+      <div class="agent-char" id="char-T">
+        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
+        <div class="a-body" style="background:#e74c3c"><span class="a-letter">T</span></div>
+        <div class="a-legs">
+          <div class="a-leg left" style="background:#e74c3c"></div>
+          <div class="a-leg right" style="background:#e74c3c"></div>
+          <div class="a-foot left"></div>
+          <div class="a-foot right"></div>
+        </div>
+      </div>
+      <div class="agent-label">Hot</div>
+      <div class="home-stack" id="stack-T">
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+        <div class="home-stack-env"></div>
+      </div>
+    </div>
+
+    <!-- Center Mailbox -->
+    <div class="mailbox" id="mailbox">
+      <div class="envelope-stack" id="envelope-stack"></div>
+      <div class="mailbox-icon">
+        <div class="mailbox-flag" id="mailbox-flag"></div>
+      </div>
+      <div class="mailbox-label">Inkorg</div>
+    </div>
   </div>
 
   <!-- Live Feed -->
@@ -408,6 +779,13 @@ if (isAdmin) {
   const timerRing = document.getElementById('timer-ring');
   const timerLabel = document.getElementById('timer-label');
   const circumference = 2 * Math.PI * 70;
+  const panel = document.getElementById('animation-panel');
+  const envelopeStack = document.getElementById('envelope-stack');
+  const mailboxFlag = document.getElementById('mailbox-flag');
+
+  const agentColors = { S: '#27ae60', W: '#f39c12', O: '#2980b9', T: '#e74c3c' };
+  const agentCounts = { S: 0, W: 0, O: 0, T: 0 };
+  let mailboxEnvelopes = 0; // track envelopes in the stack
 
   // Load QR code
   fetch('/api/qr').then(r => r.json()).then(d => {
@@ -460,6 +838,36 @@ if (isAdmin) {
     document.getElementById('count-t').textContent = counts.T;
   }
 
+  function updateAgentCounter(letter) {
+    const el = document.getElementById('counter-' + letter);
+    el.textContent = agentCounts[letter] > 0 ? agentCounts[letter] : '';
+    const stack = document.getElementById('stack-' + letter);
+    if (agentCounts[letter] > 0) {
+      stack.classList.add('has-mail');
+    } else {
+      stack.classList.remove('has-mail');
+    }
+  }
+
+  function addEnvelopeToMailbox() {
+    mailboxEnvelopes++;
+    const env = document.createElement('div');
+    env.className = 'env-in-stack';
+    envelopeStack.appendChild(env);
+    mailboxFlag.classList.add('has-mail');
+  }
+
+  function removeEnvelopeFromMailbox() {
+    if (mailboxEnvelopes <= 0) return;
+    mailboxEnvelopes--;
+    const last = envelopeStack.lastElementChild;
+    if (last) last.remove();
+    if (mailboxEnvelopes <= 0) {
+      mailboxFlag.classList.remove('has-mail');
+    }
+  }
+
+  // --- Feed ---
   function addFeedItem(id, text, classification) {
     const empty = feedList.querySelector('.feed-empty');
     if (empty) empty.remove();
@@ -486,23 +894,174 @@ if (isAdmin) {
     feedList.prepend(div);
   }
 
+  function removeFeedItem(id) {
+    const el = document.getElementById('feed-' + id);
+    if (!el) return;
+    el.classList.add('removing');
+    setTimeout(() => {
+      el.remove();
+      if (!feedList.querySelector('.feed-item')) {
+        feedList.innerHTML = '<div class="feed-empty">Inga svar ännu</div>';
+      }
+    }, 400);
+  }
+
   function escapeHtml(s) {
     const d = document.createElement('div');
     d.textContent = s;
     return d.innerHTML;
   }
 
-  // Socket events
+  // --- Walking Animation ---
+  const deliveryQueue = [];
+  let delivering = false;
+
+  function triggerDelivery(id, swotLetter) {
+    deliveryQueue.push({ id, letter: swotLetter });
+    processQueue();
+  }
+
+  function processQueue() {
+    if (delivering || deliveryQueue.length === 0) return;
+    delivering = true;
+    const job = deliveryQueue.shift();
+    animateAgentPickup(job.letter, job.id);
+  }
+
+  function animateAgentPickup(letter, submissionId) {
+    const homeEl = document.getElementById('home-' + letter);
+    const charEl = document.getElementById('char-' + letter);
+    const mailbox = document.getElementById('mailbox');
+
+    // Get positions
+    const panelRect = panel.getBoundingClientRect();
+    const homeRect = homeEl.getBoundingClientRect();
+    const charRect = charEl.getBoundingClientRect();
+    const mailboxRect = mailbox.getBoundingClientRect();
+
+    // Agent start position (relative to panel)
+    const startX = charRect.left - panelRect.left;
+    const startY = charRect.top - panelRect.top;
+
+    // Mailbox center position
+    const mailboxX = mailboxRect.left - panelRect.left + mailboxRect.width / 2 - 20;
+    const mailboxY = mailboxRect.top - panelRect.top - 10;
+
+    // Determine facing direction
+    const goingRight = mailboxX > startX;
+
+    // Hide original character during animation
+    charEl.style.visibility = 'hidden';
+
+    // Create walking clone
+    const walker = document.createElement('div');
+    walker.className = 'walking-agent' + (goingRight ? '' : ' face-left');
+    walker.innerHTML = `
+      <div class="agent-char">
+        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
+        <div class="a-body" style="background:${agentColors[letter]}"><span class="a-letter">${letter}</span></div>
+        <div class="a-legs">
+          <div class="a-leg left" style="background:${agentColors[letter]}"></div>
+          <div class="a-leg right" style="background:${agentColors[letter]}"></div>
+          <div class="a-foot left"></div>
+          <div class="a-foot right"></div>
+        </div>
+      </div>
+    `;
+    walker.style.left = startX + 'px';
+    walker.style.top = startY + 'px';
+    panel.appendChild(walker);
+
+    // Phase 1: Walk to mailbox
+    const walkDuration = 1200;
+    const startTime = performance.now();
+
+    function easeInOut(t) {
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    }
+
+    function walkTo(targetX, targetY, duration, onDone) {
+      const sx = parseFloat(walker.style.left);
+      const sy = parseFloat(walker.style.top);
+      const facingRight = targetX > sx;
+      walker.className = 'walking-agent' + (facingRight ? '' : ' face-left');
+      const wStart = performance.now();
+      function step(now) {
+        const elapsed = now - wStart;
+        const t = Math.min(elapsed / duration, 1);
+        const e = easeInOut(t);
+        walker.style.left = (sx + (targetX - sx) * e) + 'px';
+        walker.style.top = (sy + (targetY - sy) * e) + 'px';
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          onDone();
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    // Walk to mailbox
+    walkTo(mailboxX, mailboxY, walkDuration, () => {
+      // Pick up envelope
+      removeEnvelopeFromMailbox();
+
+      // Remove from feed
+      removeFeedItem(submissionId);
+
+      // Add envelope to walker
+      const env = document.createElement('div');
+      env.className = 'walking-env';
+      walker.appendChild(env);
+
+      // Phase 2: Walk back home
+      const facingRight2 = startX > mailboxX;
+      walker.className = 'walking-agent' + (facingRight2 ? '' : ' face-left');
+
+      setTimeout(() => {
+        walkTo(startX, startY, walkDuration, () => {
+          // Deliver
+          agentCounts[letter]++;
+          updateAgentCounter(letter);
+
+          // Clean up
+          walker.remove();
+          charEl.style.visibility = 'visible';
+
+          delivering = false;
+          processQueue();
+        });
+      }, 200);
+    });
+  }
+
+  // --- Socket events ---
   socket.on('session:state', (s) => {
     sessionActive = s.active;
     timerStarted = s.timerStarted;
     timeRemaining = s.timeRemaining;
     totalDuration = s.totalDuration;
     counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
+    agentCounts.S = 0; agentCounts.W = 0; agentCounts.O = 0; agentCounts.T = 0;
+    mailboxEnvelopes = 0;
+    envelopeStack.innerHTML = '';
+    mailboxFlag.classList.remove('has-mail');
+
+    let unclassifiedCount = 0;
     s.submissions.forEach((sub) => {
-      addFeedItem(sub.id, sub.text, sub.classification);
-      if (sub.classification) counts[sub.classification.swot]++;
+      if (sub.classification) {
+        counts[sub.classification.swot]++;
+        agentCounts[sub.classification.swot]++;
+        // Don't add classified items to feed (they've been picked up)
+      } else {
+        addFeedItem(sub.id, sub.text, null);
+        unclassifiedCount++;
+      }
     });
+    // Add unclassified as envelopes
+    for (let i = 0; i < unclassifiedCount; i++) addEnvelopeToMailbox();
+
+    ['S','W','O','T'].forEach(l => updateAgentCounter(l));
     updateCounts();
     updateTimerUI();
   });
@@ -514,6 +1073,11 @@ if (isAdmin) {
     totalDuration = d.totalDuration;
     feedList.innerHTML = '<div class="feed-empty">Inga svar ännu</div>';
     counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
+    agentCounts.S = 0; agentCounts.W = 0; agentCounts.O = 0; agentCounts.T = 0;
+    mailboxEnvelopes = 0;
+    envelopeStack.innerHTML = '';
+    mailboxFlag.classList.remove('has-mail');
+    ['S','W','O','T'].forEach(l => updateAgentCounter(l));
     updateCounts();
     updateTimerUI();
   });
@@ -542,343 +1106,17 @@ if (isAdmin) {
 
   socket.on('submission:new', (d) => {
     addFeedItem(d.id, d.text, null);
+    addEnvelopeToMailbox();
   });
 
   socket.on('submission:classified', (d) => {
+    // Update feed item with classification badge briefly before removal
     addFeedItem(d.id, d.text, d.classification);
     counts[d.classification.swot]++;
     updateCounts();
-    triggerDelivery(d.text, d.classification.swot);
+    // Trigger agent walk animation (which removes from feed)
+    triggerDelivery(d.id, d.classification.swot);
   });
-
-  // ===== PIXEL AGENT ANIMATION =====
-  const canvas = document.getElementById('agent-canvas');
-  const ctx = canvas.getContext('2d');
-  let cW, cH;
-
-  function resizeCanvas() {
-    const panel = document.getElementById('animation-panel');
-    cW = canvas.width = panel.clientWidth;
-    cH = canvas.height = panel.clientHeight;
-  }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-
-  // Colors: S=green, W=orange, O=blue, T=red
-  const swotColors = { S: '#27ae60', W: '#f39c12', O: '#2980b9', T: '#e74c3c' };
-  const swotLabels = { S: 'Styrkor', W: 'Svagheter', O: 'Möjligheter', T: 'Hot' };
-  const agentLetters = ['S', 'W', 'O', 'T'];
-
-  // Agent state (persistent across frames)
-  const agents = {};
-  agentLetters.forEach((l, i) => {
-    agents[l] = { letter: l, color: swotColors[l], pile: 0, bobOffset: i * 0.7, working: 0 };
-  });
-
-  // Postman state — always visible, idles at center
-  const postman = { x: 0, y: 0, state: 'idle', walkPhase: 0 };
-  const deliveryQueue = [];
-  let activeDelivery = null;
-
-  function triggerDelivery(text, target) {
-    deliveryQueue.push({ text, target });
-  }
-
-  // Compute positions based on canvas size
-  function getPositions() {
-    const groundY = cH - 36;
-    const agentY = groundY - 28;
-    const spacing = cW / 5;
-    agentLetters.forEach((l, i) => {
-      agents[l].x = spacing * (i + 1);
-      agents[l].y = agentY;
-    });
-    // Postman home = center bottom
-    if (postman.state === 'idle') {
-      postman.x = cW / 2;
-      postman.y = agentY + 12;
-    }
-  }
-
-  // --- Drawing helpers ---
-
-  function drawDesk(x, y, color) {
-    // Desktop surface
-    ctx.fillStyle = '#2a2530';
-    ctx.beginPath();
-    ctx.roundRect(x - 28, y + 2, 56, 8, 3);
-    ctx.fill();
-    // Front panel
-    ctx.fillStyle = '#1e1a24';
-    ctx.fillRect(x - 26, y + 10, 52, 14);
-    // Color strip on front
-    ctx.fillStyle = color;
-    ctx.globalAlpha = 0.5;
-    ctx.fillRect(x - 26, y + 10, 52, 3);
-    ctx.globalAlpha = 1;
-    // Legs
-    ctx.fillStyle = '#1e1a24';
-    ctx.fillRect(x - 24, y + 24, 4, 8);
-    ctx.fillRect(x + 20, y + 24, 4, 8);
-  }
-
-  function drawAgent(x, y, color, letter, scale, bob, working) {
-    const s = scale || 1;
-    const by = Math.sin(bob) * 3;
-    const cx = x;
-    const cy = y + by;
-
-    ctx.save();
-    // Body
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(cx - 12*s, cy - 28*s, 24*s, 28*s, 4*s);
-    ctx.fill();
-    // Head
-    ctx.fillStyle = '#ddd';
-    ctx.beginPath();
-    ctx.arc(cx, cy - 36*s, 10*s, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Eyes — blink or look down when working
-    ctx.fillStyle = '#222';
-    if (working > 0) {
-      // Looking down / typing — smaller eyes, shifted down
-      ctx.fillRect(cx - 4*s, cy - 37*s, 3*s, 2*s);
-      ctx.fillRect(cx + 2*s, cy - 37*s, 3*s, 2*s);
-    } else {
-      ctx.fillRect(cx - 4*s, cy - 39*s, 3*s, 3*s);
-      ctx.fillRect(cx + 2*s, cy - 39*s, 3*s, 3*s);
-    }
-
-    // Letter on body
-    ctx.fillStyle = '#fff';
-    ctx.font = `bold ${14*s}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(letter, cx, cy - 14*s);
-
-    // Arms — typing animation when working
-    if (working > 0) {
-      const armBob = Math.sin(working * 12) * 2;
-      ctx.fillStyle = color;
-      // Left arm reaching to desk
-      ctx.fillRect(cx - 16*s, cy - 12*s + armBob, 5*s, 14*s);
-      // Right arm
-      ctx.fillRect(cx + 11*s, cy - 12*s - armBob, 5*s, 14*s);
-    }
-
-    // Legs
-    ctx.fillStyle = color;
-    ctx.fillRect(cx - 8*s, cy, 6*s, 10*s);
-    ctx.fillRect(cx + 2*s, cy, 6*s, 10*s);
-    // Feet
-    ctx.fillStyle = '#333';
-    ctx.fillRect(cx - 10*s, cy + 10*s, 8*s, 4*s);
-    ctx.fillRect(cx + 1*s, cy + 10*s, 8*s, 4*s);
-    ctx.restore();
-  }
-
-  function drawPostmanChar(x, y, walkPhase, carrying) {
-    const bob = postman.state === 'idle' ? Math.sin(walkPhase * 1.5) * 2 : Math.sin(walkPhase * 8) * 3;
-    ctx.save();
-    // Body
-    ctx.fillStyle = '#8e44ad';
-    ctx.beginPath();
-    ctx.roundRect(x - 10, y - 24 + bob, 20, 24, 3);
-    ctx.fill();
-    // Head
-    ctx.fillStyle = '#ddd';
-    ctx.beginPath();
-    ctx.arc(x, y - 30 + bob, 8, 0, Math.PI * 2);
-    ctx.fill();
-    // Hat
-    ctx.fillStyle = '#8e44ad';
-    ctx.fillRect(x - 9, y - 39 + bob, 18, 5);
-    ctx.fillRect(x - 6, y - 43 + bob, 12, 5);
-    // Hat badge
-    ctx.fillStyle = '#d4a0f5';
-    ctx.fillRect(x - 3, y - 42 + bob, 6, 3);
-    // Eyes
-    ctx.fillStyle = '#222';
-    ctx.fillRect(x - 3, y - 32 + bob, 2, 2);
-    ctx.fillRect(x + 2, y - 32 + bob, 2, 2);
-    // Legs with walk animation
-    if (postman.state !== 'idle') {
-      const legSwing = Math.sin(walkPhase * 10) * 4;
-      ctx.fillStyle = '#6c3483';
-      ctx.save();
-      ctx.translate(x - 4, y + bob);
-      ctx.rotate(legSwing * 0.05);
-      ctx.fillRect(-2, 0, 5, 10);
-      ctx.restore();
-      ctx.save();
-      ctx.translate(x + 4, y + bob);
-      ctx.rotate(-legSwing * 0.05);
-      ctx.fillRect(-3, 0, 5, 10);
-      ctx.restore();
-    } else {
-      ctx.fillStyle = '#6c3483';
-      ctx.fillRect(x - 6, y + bob, 5, 8);
-      ctx.fillRect(x + 1, y + bob, 5, 8);
-    }
-    // Feet
-    ctx.fillStyle = '#333';
-    ctx.fillRect(x - 8, y + bob + (postman.state !== 'idle' ? 9 : 8), 7, 3);
-    ctx.fillRect(x + 1, y + bob + (postman.state !== 'idle' ? 9 : 8), 7, 3);
-
-    // Envelope in hand (only if carrying)
-    if (carrying) {
-      ctx.fillStyle = '#f5f5dc';
-      ctx.fillRect(x + 11, y - 18 + bob, 20, 14);
-      ctx.strokeStyle = '#ccc';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(x + 11, y - 18 + bob, 20, 14);
-      // Envelope flap
-      ctx.beginPath();
-      ctx.moveTo(x + 11, y - 18 + bob);
-      ctx.lineTo(x + 21, y - 10 + bob);
-      ctx.lineTo(x + 31, y - 18 + bob);
-      ctx.strokeStyle = '#ccc';
-      ctx.stroke();
-      // Text snippet
-      ctx.fillStyle = '#888';
-      ctx.font = '7px monospace';
-      ctx.textAlign = 'center';
-      ctx.fillText(carrying.slice(0, 6), x + 21, y - 7 + bob);
-    }
-
-    // "Brevbärare" label when idle
-    if (postman.state === 'idle') {
-      ctx.fillStyle = '#555';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Brevbärare', x, y + 22);
-    }
-    ctx.restore();
-  }
-
-  function drawPile(agent) {
-    if (agent.pile <= 0) return;
-    const count = Math.min(agent.pile, 15);
-    const baseY = agent.y + 34; // on the desk
-    for (let i = 0; i < count; i++) {
-      const ox = (i % 4) * 12 - 18;
-      const oy = -Math.floor(i / 4) * 8;
-      ctx.fillStyle = '#f5f5dc';
-      ctx.fillRect(agent.x + ox - 3, baseY + oy - 18, 12, 8);
-      ctx.strokeStyle = agent.color;
-      ctx.lineWidth = 0.8;
-      ctx.strokeRect(agent.x + ox - 3, baseY + oy - 18, 12, 8);
-    }
-    // Count
-    ctx.fillStyle = agent.color;
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(agent.pile + ' st', agent.x, agent.y + 52);
-  }
-
-  function drawLabel(agent) {
-    ctx.fillStyle = '#666';
-    ctx.font = '11px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(swotLabels[agent.letter], agent.x, agent.y + 64);
-  }
-
-  // Main animation loop
-  let animTime = 0;
-  function draw() {
-    animTime += 0.016;
-    ctx.clearRect(0, 0, cW, cH);
-    getPositions();
-
-    // Ground
-    ctx.fillStyle = '#1a1d27';
-    ctx.fillRect(0, cH - 36, cW, 36);
-    ctx.strokeStyle = '#2a2d37';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, cH - 36);
-    ctx.lineTo(cW, cH - 36);
-    ctx.stroke();
-
-    // Draw each SWOT agent with desk
-    agentLetters.forEach((l) => {
-      const a = agents[l];
-      // Decay working timer
-      if (a.working > 0) a.working = Math.max(0, a.working - 0.016);
-
-      drawDesk(a.x, a.y + 2, a.color);
-      drawPile(a);
-
-      const bobSpeed = a.working > 0 ? animTime * 3 : animTime;
-      drawAgent(a.x, a.y - 14, a.color, l, 1.0, bobSpeed + a.bobOffset, a.working);
-      drawLabel(a);
-    });
-
-    // --- Postman delivery logic ---
-    if (postman.state === 'idle' && deliveryQueue.length > 0) {
-      const job = deliveryQueue.shift();
-      const target = agents[job.target];
-      activeDelivery = {
-        text: job.text,
-        target: job.target,
-        // Phase 1: walk from home to target agent
-        startX: postman.x,
-        startY: postman.y,
-        endX: target.x,
-        endY: target.y + 12,
-        progress: 0,
-        phase: 'deliver', // deliver, then return
-      };
-      postman.state = 'walking';
-    }
-
-    if (activeDelivery) {
-      activeDelivery.progress += 0.018;
-      postman.walkPhase += 0.016;
-
-      if (activeDelivery.progress >= 1) {
-        if (activeDelivery.phase === 'deliver') {
-          // Delivered! Increment pile, trigger working animation
-          agents[activeDelivery.target].pile++;
-          agents[activeDelivery.target].working = 2.0; // 2 seconds of working anim
-
-          // Now return to center
-          activeDelivery.phase = 'return';
-          activeDelivery.startX = activeDelivery.endX;
-          activeDelivery.startY = activeDelivery.endY;
-          activeDelivery.endX = cW / 2;
-          activeDelivery.endY = agents[agentLetters[0]].y + 12;
-          activeDelivery.progress = 0;
-        } else {
-          // Returned home
-          postman.state = 'idle';
-          postman.x = cW / 2;
-          postman.y = agents[agentLetters[0]].y + 12;
-          activeDelivery = null;
-        }
-      }
-
-      if (activeDelivery) {
-        const p = activeDelivery.progress;
-        const ep = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
-        postman.x = activeDelivery.startX + (activeDelivery.endX - activeDelivery.startX) * ep;
-        postman.y = activeDelivery.startY + (activeDelivery.endY - activeDelivery.startY) * ep;
-        // Arc only on deliver phase
-        if (activeDelivery.phase === 'deliver') {
-          postman.y -= Math.sin(ep * Math.PI) * 25;
-        }
-      }
-    }
-
-    // Always draw postman
-    const carrying = activeDelivery && activeDelivery.phase === 'deliver' ? activeDelivery.text : null;
-    drawPostmanChar(postman.x, postman.y, postman.state === 'idle' ? animTime : postman.walkPhase, carrying);
-
-    requestAnimationFrame(draw);
-  }
-  draw();
 }
 </script>
 </body>

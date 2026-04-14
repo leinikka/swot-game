@@ -32,17 +32,17 @@ Configured via `.env`:
 
 ### Frontend (`public/index.html`)
 
-- Vanilla JS, no framework, no build tooling. All CSS and JS are inline.
+- Vanilla JS, no framework, no build tooling. All CSS and JS are inline. **All UI text is in Swedish.**
 - **Participant view**: text input form, timer display, session-inactive state. Submissions go via `POST /api/submit`.
-- **Admin view**: QR code panel, SVG circular timer ring, 2x2 stats grid, canvas animation panel, scrollable live feed.
+- **Admin view**: QR code panel, SVG circular timer ring, 2x2 stats grid, canvas animation panel, scrollable live feed ("Inflöde").
 - **Feed items** appear immediately as "pending" on `submission:new`, then update with classification badge on `submission:classified`.
 
 ### Animation Engine (Canvas 2D)
 
 - 60fps `requestAnimationFrame` loop drawing pixel-art characters on `#agent-canvas`.
-- Four SWOT agents are positioned evenly across the canvas. A purple postman character carries each classified submission to the correct agent.
-- Animations are **queued sequentially** (`postmanQueue` array) — only one postman active at a time.
-- Agent `pile` counts accumulate visually as letters are delivered.
+- Four SWOT agents sit at desks, positioned evenly across the canvas. A purple **postman ("Brevbärare")** is always visible, idling at center when not delivering.
+- Deliveries are **queued sequentially** (`deliveryQueue` array). The postman walks to the target agent (deliver phase), then walks back to center (return phase) before handling the next delivery.
+- When a letter arrives, the target agent plays a **working animation** (arms typing, eyes look down) for 2 seconds.
 - Agent positions recalculate on every frame to handle canvas resize.
 
 ### Color Scheme
