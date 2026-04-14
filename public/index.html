@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWOT Game</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #0f1117;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all .15s ease;
+}
+button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+input[type="text"] {
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  background: #1a1d27;
+  color: #e0e0e0;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+input[type="text"]:focus { border-color: #5b8def; }
+
+/* ===== Participant Page ===== */
+#participant-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+#participant-page h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #27ae60, #2980b9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+#participant-page .subtitle { color: #888; margin-bottom: 32px; }
+#submit-form {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+#submit-btn {
+  background: linear-gradient(135deg, #5b8def, #7c4dff);
+  color: #fff;
+}
+#submit-btn:disabled { opacity: .5; cursor: not-allowed; filter: none; transform: none; }
+#confirmation {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 500;
+  display: none;
+}
+#confirmation.success { display: block; background: #1b3a2d; color: #4ade80; border: 1px solid #27ae60; }
+#confirmation.error { display: block; background: #3a1b1b; color: #f87171; border: 1px solid #e74c3c; }
+#participant-timer {
+  margin-bottom: 24px;
+  font-size: 1.1rem;
+  color: #aaa;
+  min-height: 28px;
+}
+
+/* ===== Admin Page ===== */
+#admin-page { display: none; padding: 20px; }
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #222;
+}
+.admin-header h1 {
+  font-size: 1.6rem;
+  background: linear-gradient(135deg, #f39c12, #e74c3c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.admin-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+#start-btn { background: #27ae60; color: #fff; }
+#stop-btn { background: #e74c3c; color: #fff; }
+#export-btn { background: #2980b9; color: #fff; }
+
+/* Top bar: QR + Timer + Stats */
+.admin-top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+.qr-panel {
+  background: #1a1d27;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.qr-panel img { border-radius: 8px; }
+.qr-panel .qr-url { font-size: .8rem; color: #888; margin-top: 8px; word-break: break-all; }
+
+/* Timer */
+.timer-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #1a1d27;
+  border-radius: 12px;
+  padding: 24px;
+}
+.timer-ring-wrap { position: relative; width: 160px; height: 160px; }
+.timer-ring-wrap svg { transform: rotate(-90deg); }
+.timer-ring-bg { fill: none; stroke: #2a2d37; stroke-width: 8; }
+.timer-ring-fg { fill: none; stroke: #5b8def; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s; }
+.timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.timer-label { margin-top: 8px; color: #888; font-size: .9rem; }
+
+/* Stats */
+.stats-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stat-card {
+  background: #1a1d27;
+  border-radius: 10px;
+  padding: 16px 20px;
+  text-align: center;
+  min-width: 100px;
+}
+.stat-card .stat-num { font-size: 2rem; font-weight: 700; }
+.stat-card .stat-lbl { font-size: .75rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+.stat-s .stat-num { color: #27ae60; }
+.stat-w .stat-num { color: #e74c3c; }
+.stat-o .stat-num { color: #2980b9; }
+.stat-t .stat-num { color: #f39c12; }
+
+/* Animation panel */
+#animation-panel {
+  background: #151820;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  overflow: hidden;
+  position: relative;
+  height: 220px;
+  border: 1px solid #222;
+}
+
+/* Feed */
+.feed-panel {
+  background: #1a1d27;
+  border-radius: 12px;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.feed-panel h3 { margin-bottom: 12px; color: #aaa; }
+.feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #12141c;
+  animation: feedIn .3s ease;
+}
+@keyframes feedIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.feed-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: .9rem;
+  flex-shrink: 0;
+  color: #fff;
+}
+.feed-badge.S { background: #27ae60; }
+.feed-badge.W { background: #e74c3c; }
+.feed-badge.O { background: #2980b9; }
+.feed-badge.T { background: #f39c12; }
+.feed-badge.pending { background: #555; }
+.feed-text { flex: 1; font-size: .95rem; line-height: 1.4; }
+.feed-sub { font-size: .75rem; color: #888; margin-top: 2px; }
+.feed-empty { color: #555; text-align: center; padding: 40px; }
+
+/* Session inactive overlay for participant */
+.inactive-message {
+  background: #1a1d27;
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  color: #888;
+  font-size: 1.1rem;
+}
+
+/* Mobile */
+@media (max-width: 800px) {
+  .admin-top { grid-template-columns: 1fr; }
+  .stats-panel { grid-template-columns: 1fr 1fr; }
+  #animation-panel { height: 180px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== PARTICIPANT PAGE ===== -->
+<div id="participant-page">
+  <h1>SWOT Workshop</h1>
+  <p class="subtitle">Share your insight</p>
+  <div id="participant-timer"></div>
+  <div id="inactive-msg" class="inactive-message" style="display:none;">
+    Waiting for the session to start...
+  </div>
+  <form id="submit-form" style="display:none;">
+    <input type="text" id="answer-input" placeholder="Type your idea, strength, weakness, opportunity or threat..." maxlength="500" autocomplete="off" />
+    <button type="submit" id="submit-btn">Submit</button>
+  </form>
+  <div id="confirmation"></div>
+</div>
+
+<!-- ===== ADMIN PAGE ===== -->
+<div id="admin-page">
+  <div class="admin-header">
+    <h1>SWOT Game — Admin</h1>
+    <div class="admin-controls">
+      <button id="start-btn">Start Session</button>
+      <button id="stop-btn">Stop Session</button>
+      <button id="export-btn">Download Excel</button>
+    </div>
+  </div>
+
+  <div class="admin-top">
+    <div class="qr-panel">
+      <img id="qr-img" alt="QR Code" width="200" height="200" />
+      <div class="qr-url" id="qr-url"></div>
+    </div>
+    <div class="timer-panel">
+      <div class="timer-ring-wrap">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle class="timer-ring-bg" cx="80" cy="80" r="70" />
+          <circle class="timer-ring-fg" id="timer-ring" cx="80" cy="80" r="70"
+            stroke-dasharray="439.82" stroke-dashoffset="0" />
+        </svg>
+        <div class="timer-text" id="timer-display">--</div>
+      </div>
+      <div class="timer-label" id="timer-label">Waiting for first submission</div>
+    </div>
+    <div class="stats-panel">
+      <div class="stat-card stat-s"><div class="stat-num" id="count-s">0</div><div class="stat-lbl">Strengths</div></div>
+      <div class="stat-card stat-w"><div class="stat-num" id="count-w">0</div><div class="stat-lbl">Weaknesses</div></div>
+      <div class="stat-card stat-o"><div class="stat-num" id="count-o">0</div><div class="stat-lbl">Opportunities</div></div>
+      <div class="stat-card stat-t"><div class="stat-num" id="count-t">0</div><div class="stat-lbl">Threats</div></div>
+    </div>
+  </div>
+
+  <!-- Pixel Agent Animation -->
+  <div id="animation-panel">
+    <canvas id="agent-canvas"></canvas>
+  </div>
+
+  <!-- Live Feed -->
+  <div class="feed-panel">
+    <h3>Live Feed</h3>
+    <div id="feed-list"><div class="feed-empty">No submissions yet</div></div>
+  </div>
+</div>
+
+<script>
+// ===== Routing =====
+const isAdmin = location.pathname.startsWith('/admin');
+document.getElementById('admin-page').style.display = isAdmin ? 'block' : 'none';
+document.getElementById('participant-page').style.display = isAdmin ? 'none' : 'flex';
+
+const socket = io();
+
+// ===== Shared State =====
+let sessionActive = false;
+let timerStarted = false;
+let timeRemaining = 0;
+let totalDuration = 150;
+const counts = { S: 0, W: 0, O: 0, T: 0 };
+
+// ===== PARTICIPANT LOGIC =====
+if (!isAdmin) {
+  const form = document.getElementById('submit-form');
+  const input = document.getElementById('answer-input');
+  const btn = document.getElementById('submit-btn');
+  const conf = document.getElementById('confirmation');
+  const inactiveMsg = document.getElementById('inactive-msg');
+  const pTimer = document.getElementById('participant-timer');
+
+  function updateParticipantUI() {
+    if (!sessionActive) {
+      form.style.display = 'none';
+      inactiveMsg.style.display = 'block';
+      pTimer.textContent = '';
+    } else {
+      inactiveMsg.style.display = 'none';
+      const expired = timerStarted && timeRemaining <= 0;
+      if (expired) {
+        form.style.display = 'none';
+        pTimer.textContent = 'Time is up!';
+        pTimer.style.color = '#e74c3c';
+      } else {
+        form.style.display = 'flex';
+        if (timerStarted) {
+          const m = Math.floor(timeRemaining / 60);
+          const s = String(timeRemaining % 60).padStart(2, '0');
+          pTimer.textContent = `Time remaining: ${m}:${s}`;
+          pTimer.style.color = timeRemaining <= 30 ? '#e74c3c' : '#aaa';
+        } else {
+          pTimer.textContent = '';
+        }
+      }
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    btn.disabled = true;
+    conf.className = '';
+    conf.style.display = 'none';
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        conf.textContent = 'Submitted! You can submit another.';
+        conf.className = 'success';
+        input.value = '';
+      } else {
+        conf.textContent = data.error || 'Submission failed';
+        conf.className = 'error';
+      }
+    } catch {
+      conf.textContent = 'Network error. Try again.';
+      conf.className = 'error';
+    }
+    btn.disabled = false;
+    input.focus();
+  });
+
+  socket.on('session:started', () => { sessionActive = true; timerStarted = false; conf.style.display = 'none'; updateParticipantUI(); });
+  socket.on('session:stopped', () => { sessionActive = false; updateParticipantUI(); });
+  socket.on('timer:started', (d) => { timerStarted = true; timeRemaining = d.timeRemaining; totalDuration = d.totalDuration; updateParticipantUI(); });
+  socket.on('timer:tick', (d) => { timeRemaining = d.timeRemaining; updateParticipantUI(); });
+  socket.on('timer:ended', () => { timeRemaining = 0; updateParticipantUI(); });
+  socket.on('session:state', (s) => {
+    sessionActive = s.active;
+    timerStarted = s.timerStarted;
+    timeRemaining = s.timeRemaining;
+    totalDuration = s.totalDuration;
+    updateParticipantUI();
+  });
+}
+
+// ===== ADMIN LOGIC =====
+if (isAdmin) {
+  const startBtn = document.getElementById('start-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const exportBtn = document.getElementById('export-btn');
+  const feedList = document.getElementById('feed-list');
+  const timerDisplay = document.getElementById('timer-display');
+  const timerRing = document.getElementById('timer-ring');
+  const timerLabel = document.getElementById('timer-label');
+  const circumference = 2 * Math.PI * 70; // ~439.82
+
+  // Load QR code
+  fetch('/api/qr').then(r => r.json()).then(d => {
+    document.getElementById('qr-img').src = d.qr;
+    document.getElementById('qr-url').textContent = d.url;
+  });
+
+  startBtn.onclick = () => fetch('/api/session/start', { method: 'POST' });
+  stopBtn.onclick = () => fetch('/api/session/stop', { method: 'POST' });
+  exportBtn.onclick = () => { window.location.href = '/api/export'; };
+
+  function updateTimerUI() {
+    if (!sessionActive) {
+      timerDisplay.textContent = '--';
+      timerRing.style.strokeDashoffset = '0';
+      timerRing.style.stroke = '#5b8def';
+      timerLabel.textContent = 'Session inactive';
+      return;
+    }
+    if (!timerStarted) {
+      timerDisplay.textContent = formatTime(totalDuration);
+      timerRing.style.strokeDashoffset = '0';
+      timerRing.style.stroke = '#5b8def';
+      timerLabel.textContent = 'Waiting for first submission';
+      return;
+    }
+    timerDisplay.textContent = formatTime(timeRemaining);
+    const pct = 1 - timeRemaining / totalDuration;
+    timerRing.style.strokeDashoffset = String(pct * circumference);
+    if (timeRemaining <= 0) {
+      timerRing.style.stroke = '#e74c3c';
+      timerLabel.textContent = 'Time is up!';
+    } else if (timeRemaining <= 30) {
+      timerRing.style.stroke = '#e74c3c';
+      timerLabel.textContent = 'Hurry up!';
+    } else {
+      timerRing.style.stroke = '#5b8def';
+      timerLabel.textContent = 'Timer running';
+    }
+  }
+
+  function formatTime(s) {
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function updateCounts() {
+    document.getElementById('count-s').textContent = counts.S;
+    document.getElementById('count-w').textContent = counts.W;
+    document.getElementById('count-o').textContent = counts.O;
+    document.getElementById('count-t').textContent = counts.T;
+  }
+
+  function addFeedItem(id, text, classification) {
+    // Remove empty placeholder
+    const empty = feedList.querySelector('.feed-empty');
+    if (empty) empty.remove();
+
+    // Check if item already exists (update it)
+    let existing = document.getElementById('feed-' + id);
+    if (existing) {
+      if (classification) {
+        const badge = existing.querySelector('.feed-badge');
+        badge.textContent = classification.swot;
+        badge.className = 'feed-badge ' + classification.swot;
+        const sub = existing.querySelector('.feed-sub');
+        sub.textContent = classification.subcategory + (classification.reason ? ' — ' + classification.reason : '');
+      }
+      return;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'feed-item';
+    div.id = 'feed-' + id;
+    const badge = classification ? classification.swot : '?';
+    const badgeClass = classification ? classification.swot : 'pending';
+    const subText = classification ? classification.subcategory + (classification.reason ? ' — ' + classification.reason : '') : 'Classifying...';
+    div.innerHTML = `<div class="feed-badge ${badgeClass}">${badge}</div><div><div class="feed-text">${escapeHtml(text)}</div><div class="feed-sub">${escapeHtml(subText)}</div></div>`;
+    feedList.prepend(div);
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // Socket events
+  socket.on('session:state', (s) => {
+    sessionActive = s.active;
+    timerStarted = s.timerStarted;
+    timeRemaining = s.timeRemaining;
+    totalDuration = s.totalDuration;
+    // Reset counts
+    counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
+    s.submissions.forEach((sub) => {
+      addFeedItem(sub.id, sub.text, sub.classification);
+      if (sub.classification) counts[sub.classification.swot]++;
+    });
+    updateCounts();
+    updateTimerUI();
+  });
+
+  socket.on('session:started', (d) => {
+    sessionActive = true;
+    timerStarted = false;
+    timeRemaining = 0;
+    totalDuration = d.totalDuration;
+    feedList.innerHTML = '<div class="feed-empty">No submissions yet</div>';
+    counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
+    updateCounts();
+    updateTimerUI();
+  });
+
+  socket.on('session:stopped', () => {
+    sessionActive = false;
+    updateTimerUI();
+  });
+
+  socket.on('timer:started', (d) => {
+    timerStarted = true;
+    timeRemaining = d.timeRemaining;
+    totalDuration = d.totalDuration;
+    updateTimerUI();
+  });
+
+  socket.on('timer:tick', (d) => {
+    timeRemaining = d.timeRemaining;
+    updateTimerUI();
+  });
+
+  socket.on('timer:ended', () => {
+    timeRemaining = 0;
+    updateTimerUI();
+  });
+
+  socket.on('submission:new', (d) => {
+    addFeedItem(d.id, d.text, null);
+  });
+
+  socket.on('submission:classified', (d) => {
+    addFeedItem(d.id, d.text, d.classification);
+    counts[d.classification.swot]++;
+    updateCounts();
+    // Trigger animation
+    animatePostman(d.text, d.classification.swot);
+  });
+
+  // ===== PIXEL AGENT ANIMATION =====
+  const canvas = document.getElementById('agent-canvas');
+  const ctx = canvas.getContext('2d');
+  let cW, cH;
+
+  function resizeCanvas() {
+    const panel = document.getElementById('animation-panel');
+    cW = canvas.width = panel.clientWidth;
+    cH = canvas.height = panel.clientHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // SWOT Agent positions (will be computed)
+  const swotColors = { S: '#27ae60', W: '#e74c3c', O: '#2980b9', T: '#f39c12' };
+  const swotLabels = { S: 'Strengths', W: 'Weaknesses', O: 'Opportunities', T: 'Threats' };
+  const agents = {};
+  const letters = ['S', 'W', 'O', 'T'];
+
+  function getAgentPositions() {
+    const spacing = cW / 5;
+    letters.forEach((l, i) => {
+      agents[l] = {
+        x: spacing * (i + 1),
+        y: cH - 50,
+        letter: l,
+        color: swotColors[l],
+        pile: 0,
+        bobOffset: i * 0.7,
+      };
+    });
+  }
+  getAgentPositions();
+
+  // Postman
+  const postmanQueue = [];
+  let activePostman = null;
+
+  function animatePostman(text, target) {
+    postmanQueue.push({ text, target });
+  }
+
+  // Draw pixel character
+  function drawAgent(x, y, color, letter, scale, bob) {
+    const s = scale || 1;
+    const by = Math.sin(bob) * 3;
+    const cx = x;
+    const cy = y + by;
+
+    ctx.save();
+    // Body
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(cx - 12*s, cy - 28*s, 24*s, 28*s, 4*s);
+    ctx.fill();
+    // Head
+    ctx.fillStyle = '#ddd';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 36*s, 10*s, 0, Math.PI * 2);
+    ctx.fill();
+    // Eyes
+    ctx.fillStyle = '#222';
+    ctx.fillRect(cx - 4*s, cy - 39*s, 3*s, 3*s);
+    ctx.fillRect(cx + 2*s, cy - 39*s, 3*s, 3*s);
+    // Letter on body
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${14*s}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(letter, cx, cy - 14*s);
+    // Legs
+    ctx.fillStyle = color;
+    ctx.fillRect(cx - 8*s, cy, 6*s, 10*s);
+    ctx.fillRect(cx + 2*s, cy, 6*s, 10*s);
+    // Feet
+    ctx.fillStyle = '#333';
+    ctx.fillRect(cx - 10*s, cy + 10*s, 8*s, 4*s);
+    ctx.fillRect(cx + 1*s, cy + 10*s, 8*s, 4*s);
+    ctx.restore();
+  }
+
+  function drawPostman(x, y, label, walkPhase) {
+    const bob = Math.sin(walkPhase * 8) * 2;
+    ctx.save();
+    // Body
+    ctx.fillStyle = '#8e44ad';
+    ctx.beginPath();
+    ctx.roundRect(x - 10, y - 24 + bob, 20, 24, 3);
+    ctx.fill();
+    // Head
+    ctx.fillStyle = '#ddd';
+    ctx.beginPath();
+    ctx.arc(x, y - 30 + bob, 8, 0, Math.PI * 2);
+    ctx.fill();
+    // Hat
+    ctx.fillStyle = '#8e44ad';
+    ctx.fillRect(x - 9, y - 39 + bob, 18, 5);
+    ctx.fillRect(x - 6, y - 43 + bob, 12, 5);
+    // Eyes
+    ctx.fillStyle = '#222';
+    ctx.fillRect(x - 3, y - 32 + bob, 2, 2);
+    ctx.fillRect(x + 2, y - 32 + bob, 2, 2);
+    // Legs (walk animation)
+    const legSwing = Math.sin(walkPhase * 8) * 5;
+    ctx.fillStyle = '#6c3483';
+    ctx.fillRect(x - 6, y + bob, 5, 8);
+    ctx.fillRect(x + 1, y + bob, 5, 8);
+    // Letter/envelope in hand
+    ctx.fillStyle = '#f5f5dc';
+    ctx.fillRect(x + 10, y - 18 + bob, 18, 12);
+    ctx.strokeStyle = '#bbb';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 10, y - 18 + bob, 18, 12);
+    // Envelope flap
+    ctx.beginPath();
+    ctx.moveTo(x + 10, y - 18 + bob);
+    ctx.lineTo(x + 19, y - 11 + bob);
+    ctx.lineTo(x + 28, y - 18 + bob);
+    ctx.strokeStyle = '#bbb';
+    ctx.stroke();
+    // Label snippet on envelope
+    ctx.fillStyle = '#666';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label.slice(0, 6), x + 19, y - 8 + bob);
+    ctx.restore();
+  }
+
+  // Pile of letters next to agent
+  function drawPile(agent) {
+    if (agent.pile <= 0) return;
+    const count = Math.min(agent.pile, 15);
+    for (let i = 0; i < count; i++) {
+      const ox = (i % 5) * 14 - 28;
+      const oy = -Math.floor(i / 5) * 10;
+      ctx.fillStyle = '#f5f5dc';
+      ctx.fillRect(agent.x + ox - 5, agent.y + 10 + oy, 14, 9);
+      ctx.strokeStyle = agent.color;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(agent.x + ox - 5, agent.y + 10 + oy, 14, 9);
+    }
+    // Count badge
+    if (agent.pile > 0) {
+      ctx.fillStyle = agent.color;
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(agent.pile + ' items', agent.x, agent.y + 36);
+    }
+  }
+
+  // Label under agents
+  function drawLabel(agent) {
+    ctx.fillStyle = '#555';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(swotLabels[agent.letter], agent.x, agent.y + 48);
+  }
+
+  // Main animation loop
+  let animTime = 0;
+  function draw() {
+    animTime += 0.016;
+    ctx.clearRect(0, 0, cW, cH);
+    getAgentPositions();
+
+    // Ground line
+    ctx.strokeStyle = '#2a2d37';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(0, cH - 32);
+    ctx.lineTo(cW, cH - 32);
+    ctx.stroke();
+
+    // Draw SWOT agents
+    letters.forEach((l) => {
+      const a = agents[l];
+      drawPile(a);
+      drawAgent(a.x, a.y - 14, a.color, l, 1.1, animTime + a.bobOffset);
+      drawLabel(a);
+    });
+
+    // Process postman queue
+    if (!activePostman && postmanQueue.length > 0) {
+      const job = postmanQueue.shift();
+      const target = agents[job.target];
+      activePostman = {
+        startX: 30,
+        startY: cH - 64,
+        endX: target.x,
+        endY: target.y - 14,
+        text: job.text,
+        target: job.target,
+        progress: 0,
+      };
+    }
+
+    if (activePostman) {
+      activePostman.progress += 0.025;
+      if (activePostman.progress >= 1) {
+        // Delivered
+        agents[activePostman.target].pile++;
+        activePostman = null;
+      } else {
+        const p = activePostman.progress;
+        // Ease in-out
+        const ep = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p + 2, 2) / 2;
+        const px = activePostman.startX + (activePostman.endX - activePostman.startX) * ep;
+        const py = activePostman.startY + (activePostman.endY - activePostman.startY) * ep - Math.sin(ep * Math.PI) * 30;
+        drawPostman(px, py, activePostman.text, activePostman.progress);
+      }
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+</script>
+</body>
+</html>
