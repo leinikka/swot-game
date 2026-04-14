@@ -241,6 +241,7 @@ async function generateQR(url) {
 
 // --- Routes ---
 app.use(express.json());
+app.use('/audio', express.static(path.join(__dirname, 'public', 'audio')));
 
 app.get('/', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/admin', (_req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));

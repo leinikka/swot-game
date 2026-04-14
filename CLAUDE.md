@@ -14,7 +14,7 @@ No test framework, linter, or build step is configured. The app is plain Node.js
 ## Environment
 
 Configured via `.env`:
-- `ANTHROPIC_API_KEY` — required for AI classification
+- `ANTHROPIC_API_KEY` — required for AI classification and speech bubbles
 - `PORT` — server port (default 3000)
 - `SESSION_DURATION` — countdown timer in seconds (default 150)
 
@@ -26,24 +26,25 @@ Configured via `.env`:
 
 - **Session state is in-memory** (no database). Restarting the server loses all data.
 - **Timer starts on first submission**, not on session start. The admin's "Start Session" just opens the session for submissions.
-- **Classification is async**: the `/api/submit` endpoint returns immediately, then classifies via Claude API in the background. Results are broadcast via Socket.io `submission:classified` event.
-- **Socket.io** broadcasts all state changes (timer ticks, new submissions, classifications) to every connected client. New clients receive full state on connect via `session:state`.
-- **Excel export** uses ExcelJS to build a multi-sheet workbook on demand. Filenames auto-increment (`swotgame.xlsx`, `swotgame(1).xlsx`, ...) to avoid overwrites. Color codes in Excel match the UI.
+- **Two-stage AI pipeline per submission**: (1) `classifySubmission` classifies into SWOT category, subcategory, and confidence (1-10), (2) `generateSpeechBubbles` generates 1-2 short Swedish speech lines for agents based on context (confidence level, consecutive count, submission text). Both use Claude Sonnet.
+- **Socket.io** broadcasts all state changes. Key events: `submission:new` (immediate), `submission:classified` (after AI), `speech:bubbles` (after speech generation). New clients receive full state on connect via `session:state`.
+- **Consecutive agent tracking** (`session.consecutiveAgent` / `consecutiveCount`) feeds into speech bubble generation so agents react to getting many submissions in a row.
+- **Excel export** uses ExcelJS to build a multi-sheet workbook on demand. Filenames auto-increment to avoid overwrites.
 
 ### Frontend (`public/index.html`)
 
 - Vanilla JS, no framework, no build tooling. All CSS and JS are inline. **All UI text is in Swedish.**
 - **Participant view**: text input form, timer display, session-inactive state. Submissions go via `POST /api/submit`.
-- **Admin view**: QR code panel, SVG circular timer ring, 2x2 stats grid, canvas animation panel, scrollable live feed ("Inflöde").
-- **Feed items** appear immediately as "pending" on `submission:new`, then update with classification badge on `submission:classified`.
+- **Admin view**: QR code panel, SVG circular timer ring, 2×2 stats grid, animation panel, scrollable live feed ("Inflöde").
+- **Feed items** appear immediately as "pending" on `submission:new`, then get removed from feed when the agent picks up the envelope.
 
-### Animation Engine (Canvas 2D)
+### Animation System (CSS + requestAnimationFrame)
 
-- 60fps `requestAnimationFrame` loop drawing pixel-art characters on `#agent-canvas`.
-- Four SWOT agents sit at desks, positioned evenly across the canvas. A purple **postman ("Brevbärare")** is always visible, idling at center when not delivering.
-- Deliveries are **queued sequentially** (`deliveryQueue` array). The postman walks to the target agent (deliver phase), then walks back to center (return phase) before handling the next delivery.
-- When a letter arrives, the target agent plays a **working animation** (arms typing, eyes look down) for 2 seconds.
-- Agent positions recalculate on every frame to handle canvas resize.
+- **Layout**: center mailbox ("Inkorg") with envelope stack; four SWOT agents in corners (S top-left, W top-right, O bottom-left, T bottom-right).
+- **Delivery flow**: on `submission:classified`, the target agent's character is hidden, a walking clone walks from the corner to the mailbox (2800ms eased), picks up an envelope (removes from mailbox stack + feed), adds a carrying bob animation, then walks back home. Deliveries are **queued sequentially** via `deliveryQueue`.
+- **Home bases** show an envelope stack graphic (visible only when count > 0) and a counter number.
+- **Speech bubbles**: white rounded bubbles above agents, animated in/out, auto-fade after 3.5s. Triggered by `speech:bubbles` event, idle timer (10s no activity), and timer-end closing lines.
+- Agent characters are CSS pixel-art (head, body with letter, legs with walk animation). `face-left` class flips via `scaleX(-1)`.
 
 ### Color Scheme
 
@@ -55,4 +56,4 @@ Consistent across UI, animation, and Excel export:
 
 ### AI Classification
 
-Uses Claude Sonnet (`claude-sonnet-4-20250514`) to classify each submission into one SWOT category and one subcategory (capacity, competence, economy, culture, technology, market, or other). Falls back to `{swot: "S", subcategory: "other"}` on any error.
+Uses Claude Sonnet (`claude-sonnet-4-20250514`) for both classification and speech bubbles. Classification returns `{swot, subcategory, reason, confidence}`. Speech bubble generation is fire-and-forget (doesn't block the classification broadcast). Falls back gracefully on errors — classification defaults to `S/other/confidence:3`, speech bubbles silently skip.

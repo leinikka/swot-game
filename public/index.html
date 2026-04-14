@@ -107,35 +107,39 @@ input[type="text"]:focus { border-color: #5b8def; }
 #stop-btn { background: #e74c3c; color: #fff; }
 #export-btn { background: #2980b9; color: #fff; }
 
-/* Top bar: QR + Timer + Stats */
+/* Top bar: QR + Timer + Stats in one compact row */
 .admin-top {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 24px;
+  grid-template-columns: auto auto 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 16px;
 }
 .qr-panel {
   background: #1a1d27;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 10px;
+  padding: 10px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-.qr-panel img { border-radius: 8px; }
-.qr-panel .qr-url { font-size: .8rem; color: #888; margin-top: 8px; word-break: break-all; }
+.qr-panel img { border-radius: 6px; width: 72px; height: 72px; }
+.qr-panel .qr-url { font-size: .65rem; color: #888; margin-top: 4px; word-break: break-all; max-width: 90px; }
 
-/* Timer */
+/* Timer — compact */
 .timer-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   background: #1a1d27;
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 10px;
+  padding: 8px 14px;
 }
-.timer-ring-wrap { position: relative; width: 160px; height: 160px; }
-.timer-ring-wrap svg { transform: rotate(-90deg); }
+.timer-ring-wrap { position: relative; width: 64px; height: 64px; }
+.timer-ring-wrap svg { transform: rotate(-90deg); width: 64px; height: 64px; }
 .timer-ring-bg { fill: none; stroke: #2a2d37; stroke-width: 8; }
 .timer-ring-fg { fill: none; stroke: #5b8def; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s; }
 .timer-text {
@@ -144,27 +148,25 @@ input[type="text"]:focus { border-color: #5b8def; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.4rem;
+  font-size: 1.1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.timer-label { margin-top: 8px; color: #888; font-size: .9rem; }
+.timer-label { margin-top: 4px; color: #888; font-size: .7rem; }
 
-/* Stats */
-.stats-panel {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+/* Stats — inline with QR and timer */
 .stat-card {
   background: #1a1d27;
   border-radius: 10px;
-  padding: 16px 20px;
+  padding: 10px 8px;
   text-align: center;
-  min-width: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-.stat-card .stat-num { font-size: 2rem; font-weight: 700; }
-.stat-card .stat-lbl { font-size: .75rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+.stat-card .stat-num { font-size: 1.8rem; font-weight: 700; }
+.stat-card .stat-lbl { font-size: .65rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
 .stat-s .stat-num { color: #27ae60; }
 .stat-w .stat-num { color: #f39c12; }
 .stat-o .stat-num { color: #2980b9; }
@@ -174,10 +176,10 @@ input[type="text"]:focus { border-color: #5b8def; }
 #animation-panel {
   background: #151820;
   border-radius: 12px;
-  margin-bottom: 24px;
-  overflow: hidden;
+  margin-bottom: 16px;
+  overflow: visible;
   position: relative;
-  height: 340px;
+  height: 520px;
   border: 1px solid #222;
 }
 
@@ -283,10 +285,10 @@ input[type="text"]:focus { border-color: #5b8def; }
   align-items: center;
   z-index: 10;
 }
-.agent-home.corner-tl { top: 16px; left: 24px; }
-.agent-home.corner-tr { top: 16px; right: 24px; }
-.agent-home.corner-bl { bottom: 16px; left: 24px; }
-.agent-home.corner-br { bottom: 16px; right: 24px; }
+.agent-home.corner-tl { top: 50px; left: 60px; }
+.agent-home.corner-tr { top: 50px; right: 60px; }
+.agent-home.corner-bl { bottom: 30px; left: 60px; }
+.agent-home.corner-br { bottom: 30px; right: 60px; }
 
 .agent-counter {
   font-size: 1.4rem;
@@ -521,10 +523,10 @@ input[type="text"]:focus { border-color: #5b8def; }
   animation: carryBob .5s ease-in-out infinite;
 }
 
-/* Speech bubbles */
+/* Speech bubbles — works on both .agent-home and .walking-agent */
 .speech-bubble {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: -32px;
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
@@ -535,7 +537,7 @@ input[type="text"]:focus { border-color: #5b8def; }
   border-radius: 12px;
   white-space: nowrap;
   box-shadow: 0 2px 8px rgba(0,0,0,.3);
-  z-index: 30;
+  z-index: 50;
   animation: bubbleIn .3s ease forwards;
   pointer-events: none;
 }
@@ -551,6 +553,10 @@ input[type="text"]:focus { border-color: #5b8def; }
 .speech-bubble.fade-out {
   animation: bubbleOut .4s ease forwards;
 }
+/* Don't flip the bubble text when agent faces left */
+.walking-agent.face-left .speech-bubble {
+  transform: translateX(-50%) scaleX(-1);
+}
 @keyframes bubbleIn {
   from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(.8); }
   to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
@@ -562,9 +568,11 @@ input[type="text"]:focus { border-color: #5b8def; }
 
 /* Mobile */
 @media (max-width: 800px) {
-  .admin-top { grid-template-columns: 1fr; }
-  .stats-panel { grid-template-columns: 1fr 1fr; }
-  #animation-panel { height: 280px; }
+  .admin-top { grid-template-columns: 1fr 1fr 1fr; }
+  #animation-panel { height: 360px; }
+  .agent-home.corner-tl, .agent-home.corner-tr { top: 40px; }
+  .agent-home.corner-tl, .agent-home.corner-bl { left: 30px; }
+  .agent-home.corner-tr, .agent-home.corner-br { right: 30px; }
 }
 </style>
 </head>
@@ -598,12 +606,12 @@ input[type="text"]:focus { border-color: #5b8def; }
 
   <div class="admin-top">
     <div class="qr-panel">
-      <img id="qr-img" alt="QR-kod" width="200" height="200" />
+      <img id="qr-img" alt="QR-kod" />
       <div class="qr-url" id="qr-url"></div>
     </div>
     <div class="timer-panel">
       <div class="timer-ring-wrap">
-        <svg width="160" height="160" viewBox="0 0 160 160">
+        <svg viewBox="0 0 160 160">
           <circle class="timer-ring-bg" cx="80" cy="80" r="70" />
           <circle class="timer-ring-fg" id="timer-ring" cx="80" cy="80" r="70"
             stroke-dasharray="439.82" stroke-dashoffset="0" />
@@ -612,13 +620,14 @@ input[type="text"]:focus { border-color: #5b8def; }
       </div>
       <div class="timer-label" id="timer-label">Väntar på första svaret</div>
     </div>
-    <div class="stats-panel">
-      <div class="stat-card stat-s"><div class="stat-num" id="count-s">0</div><div class="stat-lbl">Styrkor</div></div>
-      <div class="stat-card stat-w"><div class="stat-num" id="count-w">0</div><div class="stat-lbl">Svagheter</div></div>
-      <div class="stat-card stat-o"><div class="stat-num" id="count-o">0</div><div class="stat-lbl">Möjligheter</div></div>
-      <div class="stat-card stat-t"><div class="stat-num" id="count-t">0</div><div class="stat-lbl">Hot</div></div>
-    </div>
+    <div class="stat-card stat-s"><div class="stat-num" id="count-s">0</div><div class="stat-lbl">Styrkor</div></div>
+    <div class="stat-card stat-w"><div class="stat-num" id="count-w">0</div><div class="stat-lbl">Svagheter</div></div>
+    <div class="stat-card stat-o"><div class="stat-num" id="count-o">0</div><div class="stat-lbl">Möjligheter</div></div>
+    <div class="stat-card stat-t"><div class="stat-num" id="count-t">0</div><div class="stat-lbl">Hot</div></div>
   </div>
+
+  <!-- Background music -->
+  <audio id="bg-music" src="/audio/music.mp3" preload="auto"></audio>
 
   <!-- Animation Panel -->
   <div id="animation-panel">
@@ -834,6 +843,9 @@ if (isAdmin) {
   const agentColors = { S: '#27ae60', W: '#f39c12', O: '#2980b9', T: '#e74c3c' };
   const agentCounts = { S: 0, W: 0, O: 0, T: 0 };
   let mailboxEnvelopes = 0; // track envelopes in the stack
+  const activeWalkers = {}; // letter -> walker element, tracks walking agents
+  const bgMusic = document.getElementById('bg-music');
+  let musicPlayed = false;
 
   // Load QR code
   fetch('/api/qr').then(r => r.json()).then(d => {
@@ -962,23 +974,34 @@ if (isAdmin) {
 
   // --- Speech Bubbles ---
   function showSpeechBubble(agentLetter, text) {
-    const homeEl = document.getElementById('home-' + agentLetter);
-    if (!homeEl) return;
-    // Remove existing bubble on this agent
-    const existing = homeEl.querySelector('.speech-bubble');
+    // Attach to walking agent if one exists, otherwise to home base
+    const target = activeWalkers[agentLetter] || document.getElementById('home-' + agentLetter);
+    if (!target) return;
+    // Remove existing bubble on this target
+    const existing = target.querySelector('.speech-bubble');
     if (existing) existing.remove();
 
     const bubble = document.createElement('div');
     bubble.className = 'speech-bubble';
     bubble.textContent = text;
-    homeEl.style.position = 'absolute'; // ensure positioning context
-    homeEl.appendChild(bubble);
+    bubble.dataset.agent = agentLetter;
+    target.appendChild(bubble);
 
     // Fade out after 3.5s
     setTimeout(() => {
-      bubble.classList.add('fade-out');
-      setTimeout(() => bubble.remove(), 400);
+      if (bubble.parentNode) {
+        bubble.classList.add('fade-out');
+        setTimeout(() => bubble.remove(), 400);
+      }
     }, 3500);
+  }
+
+  // Transfer speech bubble from home to walker or vice versa
+  function transferBubble(agentLetter, fromEl, toEl) {
+    const bubble = fromEl.querySelector(`.speech-bubble[data-agent="${agentLetter}"]`);
+    if (bubble && toEl) {
+      toEl.appendChild(bubble);
+    }
   }
 
   // Idle chatter timer
@@ -1072,6 +1095,10 @@ if (isAdmin) {
     walker.style.top = startY + 'px';
     panel.appendChild(walker);
 
+    // Register walker so speech bubbles attach to it
+    activeWalkers[letter] = walker;
+    transferBubble(letter, homeEl, walker);
+
     // Slow strolling speed
     const walkDuration = 2800;
 
@@ -1126,6 +1153,10 @@ if (isAdmin) {
           agentCounts[letter]++;
           updateAgentCounter(letter);
 
+          // Transfer any bubble back to home before removing walker
+          transferBubble(letter, walker, homeEl);
+          delete activeWalkers[letter];
+
           // Clean up
           walker.remove();
           charEl.style.visibility = 'visible';
@@ -1177,6 +1208,7 @@ if (isAdmin) {
     counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
     agentCounts.S = 0; agentCounts.W = 0; agentCounts.O = 0; agentCounts.T = 0;
     mailboxEnvelopes = 0;
+    musicPlayed = false;
     resetIdleTimer();
     envelopeStack.innerHTML = '';
     mailboxFlag.classList.remove('has-mail');
@@ -1195,6 +1227,11 @@ if (isAdmin) {
     timeRemaining = d.timeRemaining;
     totalDuration = d.totalDuration;
     updateTimerUI();
+    // Play background music on first submission
+    if (!musicPlayed) {
+      musicPlayed = true;
+      bgMusic.play().catch(() => {});
+    }
   });
 
   socket.on('timer:tick', (d) => {
