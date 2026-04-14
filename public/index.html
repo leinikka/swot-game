@@ -88,12 +88,11 @@ input[type="text"]:focus { border-color: #5b8def; }
 #admin-page { display: none; padding: 20px; }
 .admin-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #222;
 }
 .admin-header h1 {
@@ -102,6 +101,7 @@ input[type="text"]:focus { border-color: #5b8def; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.admin-url { font-size: .8rem; color: #666; }
 .admin-controls { display: flex; gap: 10px; flex-wrap: wrap; }
 #start-btn { background: #27ae60; color: #fff; }
 #stop-btn { background: #e74c3c; color: #fff; }
@@ -118,15 +118,12 @@ input[type="text"]:focus { border-color: #5b8def; }
 .qr-panel {
   background: #1a1d27;
   border-radius: 10px;
-  padding: 10px;
-  text-align: center;
+  padding: 6px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
-.qr-panel img { border-radius: 6px; width: 72px; height: 72px; }
-.qr-panel .qr-url { font-size: .65rem; color: #888; margin-top: 4px; word-break: break-all; max-width: 90px; }
+.qr-panel img { border-radius: 4px; width: 100%; height: 100%; object-fit: contain; }
 
 /* Timer — compact */
 .timer-panel {
@@ -596,7 +593,8 @@ input[type="text"]:focus { border-color: #5b8def; }
 <!-- ===== ADMIN PAGE ===== -->
 <div id="admin-page">
   <div class="admin-header">
-    <h1>SWOT-spelet — Admin</h1>
+    <h1>SWOT-spelet</h1>
+    <div class="admin-url" id="admin-url"></div>
     <div class="admin-controls">
       <button id="start-btn">Starta session</button>
       <button id="stop-btn">Stoppa session</button>
@@ -607,7 +605,6 @@ input[type="text"]:focus { border-color: #5b8def; }
   <div class="admin-top">
     <div class="qr-panel">
       <img id="qr-img" alt="QR-kod" />
-      <div class="qr-url" id="qr-url"></div>
     </div>
     <div class="timer-panel">
       <div class="timer-ring-wrap">
@@ -847,10 +844,10 @@ if (isAdmin) {
   const bgMusic = document.getElementById('bg-music');
   let musicPlayed = false;
 
-  // Load QR code
+  // Load QR code and service URL
   fetch('/api/qr').then(r => r.json()).then(d => {
     document.getElementById('qr-img').src = d.qr;
-    document.getElementById('qr-url').textContent = d.url;
+    document.getElementById('admin-url').textContent = d.url;
   });
 
   startBtn.onclick = () => fetch('/api/session/start', { method: 'POST' });
@@ -1099,8 +1096,8 @@ if (isAdmin) {
     activeWalkers[letter] = walker;
     transferBubble(letter, homeEl, walker);
 
-    // Slow strolling speed
-    const walkDuration = 2800;
+    // Very leisurely stroll
+    const walkDuration = 4500;
 
     function easeInOut(t) {
       return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;

@@ -61,15 +61,15 @@ async function classifySubmission(text) {
       messages: [
         {
           role: 'user',
-          content: `You are a SWOT analysis expert. Classify the following text into exactly one SWOT category and one subcategory.
+          content: `Du är en SWOT-analysexpert. Klassificera följande text i exakt en SWOT-kategori och en underkategori.
 
-SWOT categories: S (Strength), W (Weakness), O (Opportunity), T (Threat)
-Subcategories: capacity, competence, economy, culture, technology, market, other
+SWOT-kategorier: S (Styrka), W (Svaghet), O (Möjlighet), T (Hot)
+Underkategorier: kapacitet, kompetens, ekonomi, kultur, teknik, marknad, övrigt
 
 Text: "${text}"
 
-Respond with ONLY valid JSON, no markdown:
-{"swot": "S", "subcategory": "competence", "reason": "brief reason", "confidence": 8}`,
+Svara ENBART med giltig JSON, ingen markdown. Alla fält ska vara på svenska:
+{"swot": "S", "subcategory": "kompetens", "reason": "kort motivering på svenska", "confidence": 8}`,
         },
       ],
     });
@@ -77,13 +77,13 @@ Respond with ONLY valid JSON, no markdown:
     const content = response.content[0].text.trim();
     const parsed = JSON.parse(content);
     const swot = ['S', 'W', 'O', 'T'].includes(parsed.swot) ? parsed.swot : 'S';
-    const validSubs = ['capacity', 'competence', 'economy', 'culture', 'technology', 'market', 'other'];
-    const subcategory = validSubs.includes(parsed.subcategory) ? parsed.subcategory : 'other';
+    const validSubs = ['kapacitet', 'kompetens', 'ekonomi', 'kultur', 'teknik', 'marknad', 'övrigt'];
+    const subcategory = validSubs.includes(parsed.subcategory) ? parsed.subcategory : 'övrigt';
     const confidence = Math.max(1, Math.min(10, parseInt(parsed.confidence, 10) || 5));
     return { swot, subcategory, reason: parsed.reason || '', confidence };
   } catch (err) {
     console.error('Classification error:', err.message);
-    return { swot: 'S', subcategory: 'other', reason: 'Classification failed', confidence: 3 };
+    return { swot: 'S', subcategory: 'övrigt', reason: 'Klassificering misslyckades', confidence: 3 };
   }
 }
 
