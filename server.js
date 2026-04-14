@@ -134,6 +134,41 @@ or for two bubbles:
   }
 }
 
+// --- Argument Generation (low confidence) ---
+async function generateArgument(winnerAgent, rivalAgent, text) {
+  try {
+    const agentNames = { S: 'Styrkor', W: 'Svagheter', O: 'Möjligheter', T: 'Hot' };
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 200,
+      messages: [
+        {
+          role: 'user',
+          content: `Skriv en kort, humoristisk ordväxling på svenska mellan två SWOT-agenter som bråkar om vem som ska få ett brev.
+
+Situation: Agent ${winnerAgent} (${agentNames[winnerAgent]}) och agent ${rivalAgent} (${agentNames[rivalAgent]}) bråkar om brevet. ${winnerAgent} vinner till slut.
+Brevets text: "${text}"
+
+Regler:
+- Exakt 4 repliker, max 8 ord vardera
+- Ordning: ${rivalAgent} påstår att brevet är deras, ${winnerAgent} protesterar, ${rivalAgent} insisterar, ${winnerAgent} vinner med sista ordet
+- Humoristisk och lättsam ton
+- Svara ENBART med giltig JSON-array, ingen markdown:
+[{"agent":"${rivalAgent}","text":"replik"},{"agent":"${winnerAgent}","text":"replik"},{"agent":"${rivalAgent}","text":"replik"},{"agent":"${winnerAgent}","text":"replik"}]`,
+        },
+      ],
+    });
+
+    const content = response.content[0].text.trim();
+    const parsed = JSON.parse(content);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(b => b.agent && b.text && ['S', 'W', 'O', 'T'].includes(b.agent)).slice(0, 4);
+  } catch (err) {
+    console.error('Argument generation error:', err.message);
+    return [];
+  }
+}
+
 // --- Excel Export ---
 function getExportPath() {
   const dir = __dirname;
@@ -339,14 +374,25 @@ app.post('/api/submit', async (req, res) => {
     classification,
   });
 
-  // Generate speech bubbles asynchronously (don't block classification)
-  generateSpeechBubbles(submission.text, classification, {
-    [classification.swot]: session.consecutiveCount,
-  }).then(bubbles => {
-    if (bubbles.length > 0) {
-      io.emit('speech:bubbles', { submissionId: submission.id, bubbles });
-    }
-  });
+  // Low confidence: generate argument between two agents
+  if (classification.confidence < 6) {
+    const otherAgents = ['S', 'W', 'O', 'T'].filter(a => a !== classification.swot);
+    const rival = otherAgents[Math.floor(Math.random() * otherAgents.length)];
+    generateArgument(classification.swot, rival, submission.text).then(lines => {
+      if (lines.length > 0) {
+        io.emit('speech:argument', { submissionId: submission.id, winner: classification.swot, rival, lines });
+      }
+    });
+  } else {
+    // Normal speech bubbles
+    generateSpeechBubbles(submission.text, classification, {
+      [classification.swot]: session.consecutiveCount,
+    }).then(bubbles => {
+      if (bubbles.length > 0) {
+        io.emit('speech:bubbles', { submissionId: submission.id, bubbles });
+      }
+    });
+  }
 });
 
 app.get('/api/export', async (_req, res) => {
