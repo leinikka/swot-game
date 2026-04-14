@@ -115,15 +115,16 @@ input[type="text"]:focus { border-color: #5b8def; }
   gap: 8px;
   align-items: stretch;
   margin-bottom: 12px;
-  height: 56px;
+  height: 73px;
 }
 .qr-panel {
   background: #1a1d27;
   border-radius: 8px;
-  padding: 4px;
+  padding: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 .qr-panel img { border-radius: 3px; height: 100%; width: auto; object-fit: contain; }
 
@@ -136,9 +137,10 @@ input[type="text"]:focus { border-color: #5b8def; }
   background: #1a1d27;
   border-radius: 8px;
   padding: 4px 8px;
+  overflow: hidden;
 }
-.timer-ring-wrap { position: relative; width: 40px; height: 40px; flex-shrink: 0; }
-.timer-ring-wrap svg { transform: rotate(-90deg); width: 40px; height: 40px; }
+.timer-ring-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+.timer-ring-wrap svg { transform: rotate(-90deg); width: 52px; height: 52px; }
 .timer-ring-bg { fill: none; stroke: #2a2d37; stroke-width: 8; }
 .timer-ring-fg { fill: none; stroke: #5b8def; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s; }
 .timer-text {
@@ -147,25 +149,26 @@ input[type="text"]:focus { border-color: #5b8def; }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: .75rem;
+  font-size: .85rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.timer-label { color: #888; font-size: .6rem; text-align: center; }
+.timer-label { color: #888; font-size: .65rem; text-align: center; }
 
 /* Stats — equal width with QR and timer */
 .stat-card {
   background: #1a1d27;
   border-radius: 8px;
-  padding: 4px;
+  padding: 6px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
-.stat-card .stat-num { font-size: 1.4rem; font-weight: 700; }
-.stat-card .stat-lbl { font-size: .6rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
+.stat-card .stat-num { font-size: 1.7rem; font-weight: 700; }
+.stat-card .stat-lbl { font-size: .65rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
 .stat-s .stat-num { color: #27ae60; }
 .stat-w .stat-num { color: #f39c12; }
 .stat-o .stat-num { color: #2980b9; }
