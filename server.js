@@ -24,6 +24,8 @@ let session = {
   timerEnd: null,
   submissions: [],
   timerId: null,
+  consecutiveAgent: null,
+  consecutiveCount: 0,
 };
 
 function resetSession() {
@@ -34,6 +36,8 @@ function resetSession() {
     timerEnd: null,
     submissions: [],
     timerId: null,
+    consecutiveAgent: null,
+    consecutiveCount: 0,
   };
 }
 
@@ -65,7 +69,7 @@ Subcategories: capacity, competence, economy, culture, technology, market, other
 Text: "${text}"
 
 Respond with ONLY valid JSON, no markdown:
-{"swot": "S", "subcategory": "competence", "reason": "brief reason"}`,
+{"swot": "S", "subcategory": "competence", "reason": "brief reason", "confidence": 8}`,
         },
       ],
     });
@@ -75,10 +79,58 @@ Respond with ONLY valid JSON, no markdown:
     const swot = ['S', 'W', 'O', 'T'].includes(parsed.swot) ? parsed.swot : 'S';
     const validSubs = ['capacity', 'competence', 'economy', 'culture', 'technology', 'market', 'other'];
     const subcategory = validSubs.includes(parsed.subcategory) ? parsed.subcategory : 'other';
-    return { swot, subcategory, reason: parsed.reason || '' };
+    const confidence = Math.max(1, Math.min(10, parseInt(parsed.confidence, 10) || 5));
+    return { swot, subcategory, reason: parsed.reason || '', confidence };
   } catch (err) {
     console.error('Classification error:', err.message);
-    return { swot: 'S', subcategory: 'other', reason: 'Classification failed' };
+    return { swot: 'S', subcategory: 'other', reason: 'Classification failed', confidence: 3 };
+  }
+}
+
+// --- Speech Bubble Generation ---
+async function generateSpeechBubbles(text, classification, agentStats) {
+  try {
+    const receivingAgent = classification.swot;
+    const otherAgents = ['S', 'W', 'O', 'T'].filter(a => a !== receivingAgent);
+    const agentNames = { S: 'Styrkor', W: 'Svagheter', O: 'Möjligheter', T: 'Hot' };
+    const consecutiveCount = agentStats[receivingAgent] || 0;
+
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 200,
+      messages: [
+        {
+          role: 'user',
+          content: `You are writing short, humorous Swedish speech bubbles for cartoon SWOT-analysis agents.
+
+Context:
+- Submission text: "${text}"
+- Classified as: ${receivingAgent} (${agentNames[receivingAgent]}), subcategory: ${classification.subcategory}
+- Confidence: ${classification.confidence}/10
+- Agent ${receivingAgent} has received ${consecutiveCount} submissions in a row before this one
+
+Rules:
+- Generate 1-2 speech bubbles, max 8 words each, in Swedish
+- If confidence < 6: the receiving agent should sound doubtful (e.g. "Hmm, är det verkligen mitt?" or "Inte helt säker men okej...")
+- If ${consecutiveCount} >= 3: receiving agent complains about workload (e.g. "Är det bara jag som jobbar här?!")
+- Otherwise: receiving agent reacts to getting the letter, OR a non-receiving agent comments (e.g. "Den var din, ${receivingAgent}!")
+- Be situational, witty, and in character
+
+Respond with ONLY valid JSON array, no markdown:
+[{"agent": "${receivingAgent}", "text": "speech line here"}]
+or for two bubbles:
+[{"agent": "${receivingAgent}", "text": "line"}, {"agent": "${otherAgents[Math.floor(Math.random() * otherAgents.length)]}", "text": "line"}]`,
+        },
+      ],
+    });
+
+    const content = response.content[0].text.trim();
+    const parsed = JSON.parse(content);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(b => b.agent && b.text && ['S', 'W', 'O', 'T'].includes(b.agent)).slice(0, 2);
+  } catch (err) {
+    console.error('Speech bubble error:', err.message);
+    return [];
   }
 }
 
@@ -271,10 +323,28 @@ app.post('/api/submit', async (req, res) => {
   // Classify asynchronously
   const classification = await classifySubmission(submission.text);
   submission.classification = classification;
+
+  // Track consecutive agent for speech bubble context
+  if (session.consecutiveAgent === classification.swot) {
+    session.consecutiveCount++;
+  } else {
+    session.consecutiveAgent = classification.swot;
+    session.consecutiveCount = 1;
+  }
+
   io.emit('submission:classified', {
     id: submission.id,
     text: submission.text,
     classification,
+  });
+
+  // Generate speech bubbles asynchronously (don't block classification)
+  generateSpeechBubbles(submission.text, classification, {
+    [classification.swot]: session.consecutiveCount,
+  }).then(bubbles => {
+    if (bubbles.length > 0) {
+      io.emit('speech:bubbles', { submissionId: submission.id, bubbles });
+    }
   });
 });
 

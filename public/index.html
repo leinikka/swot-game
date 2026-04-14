@@ -512,6 +512,54 @@ input[type="text"]:focus { border-color: #5b8def; }
 .agent-home.corner-bl .agent-char { animation-delay: 1s; }
 .agent-home.corner-br .agent-char { animation-delay: 1.5s; }
 
+/* Carrying bob animation */
+@keyframes carryBob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
+}
+.walking-agent.carrying .agent-char {
+  animation: carryBob .5s ease-in-out infinite;
+}
+
+/* Speech bubbles */
+.speech-bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  z-index: 30;
+  animation: bubbleIn .3s ease forwards;
+  pointer-events: none;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #fff;
+}
+.speech-bubble.fade-out {
+  animation: bubbleOut .4s ease forwards;
+}
+@keyframes bubbleIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(.8); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+@keyframes bubbleOut {
+  from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  to { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(.8); }
+}
+
 /* Mobile */
 @media (max-width: 800px) {
   .admin-top { grid-template-columns: 1fr; }
@@ -912,6 +960,59 @@ if (isAdmin) {
     return d.innerHTML;
   }
 
+  // --- Speech Bubbles ---
+  function showSpeechBubble(agentLetter, text) {
+    const homeEl = document.getElementById('home-' + agentLetter);
+    if (!homeEl) return;
+    // Remove existing bubble on this agent
+    const existing = homeEl.querySelector('.speech-bubble');
+    if (existing) existing.remove();
+
+    const bubble = document.createElement('div');
+    bubble.className = 'speech-bubble';
+    bubble.textContent = text;
+    homeEl.style.position = 'absolute'; // ensure positioning context
+    homeEl.appendChild(bubble);
+
+    // Fade out after 3.5s
+    setTimeout(() => {
+      bubble.classList.add('fade-out');
+      setTimeout(() => bubble.remove(), 400);
+    }, 3500);
+  }
+
+  // Idle chatter timer
+  let lastSubmissionTime = Date.now();
+  let idleTimer = null;
+  const idleLines = [
+    'Kaffe någon?', 'Sover de där ute?', 'Hej? Nån hemma?',
+    'Lite tyst här...', 'Jag hinner med en fika!', '*gäspar*',
+    'Vem beställde lunch?', 'Är det rast redan?',
+  ];
+
+  function resetIdleTimer() {
+    lastSubmissionTime = Date.now();
+    if (idleTimer) clearInterval(idleTimer);
+    idleTimer = setInterval(() => {
+      if (Date.now() - lastSubmissionTime >= 10000 && sessionActive && timeRemaining > 0) {
+        const agents = ['S', 'W', 'O', 'T'];
+        const agent = agents[Math.floor(Math.random() * agents.length)];
+        const line = idleLines[Math.floor(Math.random() * idleLines.length)];
+        showSpeechBubble(agent, line);
+        lastSubmissionTime = Date.now(); // reset so next idle is 10s later
+      }
+    }, 5000);
+  }
+  resetIdleTimer();
+
+  // Timer end lines
+  const timerEndLines = {
+    S: 'Bra jobbat allihopa!',
+    W: 'Äntligen slut...',
+    O: 'Det var produktivt!',
+    T: 'Puh, det var intensivt!',
+  };
+
   // --- Walking Animation ---
   const deliveryQueue = [];
   let delivering = false;
@@ -935,7 +1036,6 @@ if (isAdmin) {
 
     // Get positions
     const panelRect = panel.getBoundingClientRect();
-    const homeRect = homeEl.getBoundingClientRect();
     const charRect = charEl.getBoundingClientRect();
     const mailboxRect = mailbox.getBoundingClientRect();
 
@@ -972,9 +1072,8 @@ if (isAdmin) {
     walker.style.top = startY + 'px';
     panel.appendChild(walker);
 
-    // Phase 1: Walk to mailbox
-    const walkDuration = 1200;
-    const startTime = performance.now();
+    // Slow strolling speed
+    const walkDuration = 2800;
 
     function easeInOut(t) {
       return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
@@ -984,7 +1083,9 @@ if (isAdmin) {
       const sx = parseFloat(walker.style.left);
       const sy = parseFloat(walker.style.top);
       const facingRight = targetX > sx;
-      walker.className = 'walking-agent' + (facingRight ? '' : ' face-left');
+      // Preserve carrying class if present
+      const isCarrying = walker.classList.contains('carrying');
+      walker.className = 'walking-agent' + (facingRight ? '' : ' face-left') + (isCarrying ? ' carrying' : '');
       const wStart = performance.now();
       function step(now) {
         const elapsed = now - wStart;
@@ -1009,14 +1110,15 @@ if (isAdmin) {
       // Remove from feed
       removeFeedItem(submissionId);
 
-      // Add envelope to walker
+      // Add envelope to walker and carrying bob
       const env = document.createElement('div');
       env.className = 'walking-env';
       walker.appendChild(env);
+      walker.classList.add('carrying');
 
       // Phase 2: Walk back home
       const facingRight2 = startX > mailboxX;
-      walker.className = 'walking-agent' + (facingRight2 ? '' : ' face-left');
+      walker.className = 'walking-agent' + (facingRight2 ? '' : ' face-left') + ' carrying';
 
       setTimeout(() => {
         walkTo(startX, startY, walkDuration, () => {
@@ -1031,7 +1133,7 @@ if (isAdmin) {
           delivering = false;
           processQueue();
         });
-      }, 200);
+      }, 300);
     });
   }
 
@@ -1075,6 +1177,7 @@ if (isAdmin) {
     counts.S = 0; counts.W = 0; counts.O = 0; counts.T = 0;
     agentCounts.S = 0; agentCounts.W = 0; agentCounts.O = 0; agentCounts.T = 0;
     mailboxEnvelopes = 0;
+    resetIdleTimer();
     envelopeStack.innerHTML = '';
     mailboxFlag.classList.remove('has-mail');
     ['S','W','O','T'].forEach(l => updateAgentCounter(l));
@@ -1102,11 +1205,17 @@ if (isAdmin) {
   socket.on('timer:ended', () => {
     timeRemaining = 0;
     updateTimerUI();
+    // All agents get closing lines
+    if (idleTimer) clearInterval(idleTimer);
+    Object.entries(timerEndLines).forEach(([agent, line], i) => {
+      setTimeout(() => showSpeechBubble(agent, line), i * 600);
+    });
   });
 
   socket.on('submission:new', (d) => {
     addFeedItem(d.id, d.text, null);
     addEnvelopeToMailbox();
+    resetIdleTimer();
   });
 
   socket.on('submission:classified', (d) => {
@@ -1116,6 +1225,12 @@ if (isAdmin) {
     updateCounts();
     // Trigger agent walk animation (which removes from feed)
     triggerDelivery(d.id, d.classification.swot);
+  });
+
+  socket.on('speech:bubbles', (d) => {
+    d.bubbles.forEach((b, i) => {
+      setTimeout(() => showSpeechBubble(b.agent, b.text), i * 800);
+    });
   });
 }
 </script>
