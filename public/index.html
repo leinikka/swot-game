@@ -166,23 +166,63 @@ input[type="text"]:focus { border-color: #5b8def; }
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  transition: box-shadow .3s;
 }
-.stat-card .stat-num { font-size: 1.7rem; font-weight: 700; }
+.stat-card .stat-num { font-size: 1.7rem; font-weight: 700; transition: transform .2s; }
 .stat-card .stat-lbl { font-size: .65rem; color: #888; text-transform: uppercase; letter-spacing: .5px; }
 .stat-s .stat-num { color: #27ae60; }
 .stat-w .stat-num { color: #f39c12; }
 .stat-o .stat-num { color: #2980b9; }
 .stat-t .stat-num { color: #e74c3c; }
+.stat-s:hover { box-shadow: 0 0 15px rgba(39,174,96,0.3); }
+.stat-w:hover { box-shadow: 0 0 15px rgba(243,156,18,0.3); }
+.stat-o:hover { box-shadow: 0 0 15px rgba(41,128,185,0.3); }
+.stat-t:hover { box-shadow: 0 0 15px rgba(231,76,60,0.3); }
+.stat-card .stat-num.pulse {
+  animation: counterPulse .35s ease;
+}
+@keyframes counterPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
 
 /* ===== Animation Panel ===== */
 #animation-panel {
-  background: #151820;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(39,174,96,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(243,156,18,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(41,128,185,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(231,76,60,0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #151820 0%, #12151d 60%, #10121a 100%);
   border-radius: 12px;
   margin-bottom: 12px;
   overflow: hidden;
   position: relative;
   height: 520px;
   border: 1px solid #222;
+}
+
+/* Floor / ground effect */
+#animation-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.015));
+  pointer-events: none;
+}
+
+/* Dotted paths from corners toward center */
+.path-line {
+  position: absolute;
+  border: none;
+  border-top: 2px dashed rgba(255,255,255,0.04);
+  transform-origin: 0 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* --- Mailbox (center) --- */
@@ -199,13 +239,18 @@ input[type="text"]:focus { border-color: #5b8def; }
 .mailbox-icon {
   width: 52px;
   height: 52px;
-  background: #2a2d37;
+  background: linear-gradient(180deg, #2e3140, #252836);
   border: 2px solid #3a3d47;
-  border-radius: 8px 8px 4px 4px;
+  border-radius: 10px 10px 6px 6px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 30px rgba(91,141,239,0.08);
+  transition: box-shadow .3s;
+}
+.mailbox-icon.has-mail-glow {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 40px rgba(91,141,239,0.2);
 }
 .mailbox-icon::before {
   content: '';
@@ -215,8 +260,18 @@ input[type="text"]:focus { border-color: #5b8def; }
   transform: translateX(-50%);
   width: 56px;
   height: 10px;
-  background: #3a3d47;
+  background: linear-gradient(180deg, #4a4d57, #3a3d47);
   border-radius: 4px 4px 0 0;
+}
+/* Mailbox slot */
+.mailbox-icon::after {
+  content: '';
+  width: 28px;
+  height: 4px;
+  background: #1a1d27;
+  border-radius: 2px;
+  position: absolute;
+  top: 12px;
 }
 .mailbox-flag {
   position: absolute;
@@ -224,11 +279,15 @@ input[type="text"]:focus { border-color: #5b8def; }
   top: -4px;
   width: 6px;
   height: 20px;
-  background: #e74c3c;
+  background: #555;
   border-radius: 2px;
-  transition: background .3s;
+  transition: background .3s, transform .3s;
 }
-.mailbox-flag.has-mail { background: #27ae60; }
+.mailbox-flag.has-mail {
+  background: #27ae60;
+  transform: rotate(-15deg);
+  transform-origin: bottom center;
+}
 .mailbox-flag::after {
   content: '';
   position: absolute;
@@ -240,11 +299,22 @@ input[type="text"]:focus { border-color: #5b8def; }
   border-radius: 0 2px 2px 0;
 }
 .mailbox-label {
-  margin-top: 6px;
-  font-size: 11px;
-  color: #555;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #444;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+/* Mailbox pulse when envelope arrives */
+@keyframes mailboxPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.mailbox-icon.pulse {
+  animation: mailboxPulse .3s ease;
 }
 
 /* Envelope stack in mailbox */
@@ -253,17 +323,18 @@ input[type="text"]:focus { border-color: #5b8def; }
   flex-direction: column-reverse;
   align-items: center;
   position: absolute;
-  bottom: 58px;
+  bottom: 62px;
   gap: 2px;
 }
 .env-in-stack {
   width: 36px;
   height: 22px;
-  background: #f5f5dc;
-  border: 1px solid #ccc;
-  border-radius: 2px;
+  background: linear-gradient(135deg, #faf5e4, #f0ebd4);
+  border: 1px solid #d4c89a;
+  border-radius: 3px;
   position: relative;
-  animation: envDrop .3s ease;
+  animation: envDrop .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .env-in-stack::after {
   content: '';
@@ -272,11 +343,11 @@ input[type="text"]:focus { border-color: #5b8def; }
   height: 0;
   border-left: 18px solid transparent;
   border-right: 18px solid transparent;
-  border-top: 10px solid #e8e0c8;
+  border-top: 10px solid #e6dcc0;
 }
 @keyframes envDrop {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-24px) rotate(-5deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0); }
 }
 
 /* --- Agent Home Base (corners) --- */
@@ -292,89 +363,205 @@ input[type="text"]:focus { border-color: #5b8def; }
 .agent-home.corner-bl { bottom: 40px; left: 100px; }
 .agent-home.corner-br { bottom: 40px; right: 100px; }
 
+/* Home base platform glow */
+.agent-home::before {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 50px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+.agent-home.corner-tl::before { background: radial-gradient(ellipse, rgba(39,174,96,0.12) 0%, transparent 70%); }
+.agent-home.corner-tr::before { background: radial-gradient(ellipse, rgba(243,156,18,0.12) 0%, transparent 70%); }
+.agent-home.corner-bl::before { background: radial-gradient(ellipse, rgba(41,128,185,0.12) 0%, transparent 70%); }
+.agent-home.corner-br::before { background: radial-gradient(ellipse, rgba(231,76,60,0.12) 0%, transparent 70%); }
+
 .agent-counter {
   font-size: 1.4rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   margin-bottom: 4px;
   min-height: 24px;
+  text-shadow: 0 0 10px currentColor;
 }
 .agent-label {
   font-size: 11px;
-  color: #666;
   margin-top: 2px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
+.agent-home.corner-tl .agent-label { color: rgba(39,174,96,0.7); }
+.agent-home.corner-tr .agent-label { color: rgba(243,156,18,0.7); }
+.agent-home.corner-bl .agent-label { color: rgba(41,128,185,0.7); }
+.agent-home.corner-br .agent-label { color: rgba(231,76,60,0.7); }
 
-/* Agent character (pixel-art via CSS) */
+/* Agent character */
 .agent-char {
-  width: 40px;
-  height: 56px;
+  width: 44px;
+  height: 62px;
   position: relative;
-}
-.agent-char .a-body {
-  position: absolute;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 28px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.agent-char .a-letter {
-  color: #fff;
-  font-weight: 800;
-  font-size: 14px;
-  font-family: monospace;
 }
 .agent-char .a-head {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #ddd;
+  background: linear-gradient(180deg, #f0e6d3, #e0d4c0);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 .agent-char .a-eye {
   position: absolute;
   width: 3px;
-  height: 3px;
+  height: 4px;
   background: #222;
-  top: 7px;
+  border-radius: 50%;
+  top: 8px;
 }
 .agent-char .a-eye.left { left: 5px; }
 .agent-char .a-eye.right { right: 5px; }
+/* Mouth */
+.agent-char .a-mouth {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: #b8917a;
+}
+/* Body */
+.agent-char .a-body {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 28px;
+  border-radius: 6px 6px 4px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+}
+.agent-char .a-letter {
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  font-family: monospace;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+/* Arms */
+.agent-char .a-arm {
+  position: absolute;
+  bottom: 24px;
+  width: 6px;
+  height: 16px;
+  border-radius: 3px;
+  transform-origin: top center;
+}
+.agent-char .a-arm.left { left: 3px; }
+.agent-char .a-arm.right { right: 3px; }
+/* Legs */
 .agent-char .a-legs {
   position: absolute;
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 14px;
+  width: 22px;
+  height: 16px;
 }
 .agent-char .a-leg {
   position: absolute;
   bottom: 0;
-  width: 6px;
-  height: 10px;
-  border-radius: 0 0 2px 2px;
+  width: 7px;
+  height: 12px;
+  border-radius: 0 0 3px 3px;
 }
 .agent-char .a-leg.left { left: 1px; }
 .agent-char .a-leg.right { right: 1px; }
 .agent-char .a-foot {
   position: absolute;
   bottom: 0;
-  width: 8px;
+  width: 9px;
   height: 4px;
-  background: #333;
-  border-radius: 1px;
+  background: #2a2a2a;
+  border-radius: 2px;
 }
 .agent-char .a-foot.left { left: 0; }
 .agent-char .a-foot.right { right: 0; }
+
+/* Agent-specific accessories via pseudo-elements on .a-head */
+/* S: little crown/star */
+#char-S .a-head::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 6px;
+  background: #f1c40f;
+  clip-path: polygon(0% 100%, 15% 0%, 30% 60%, 50% 0%, 70% 60%, 85% 0%, 100% 100%);
+}
+/* W: glasses */
+#char-W .a-head::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 7px;
+  border: 2px solid #555;
+  border-radius: 3px;
+  background: rgba(100,100,100,0.15);
+}
+/* O: little antenna/idea bulb */
+#char-O .a-head::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #5dade2;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(93,173,226,0.6);
+}
+#char-O .a-head::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 5px;
+  background: #5dade2;
+}
+/* T: little horn/spike */
+#char-T .a-head::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #e74c3c;
+  filter: drop-shadow(0 0 3px rgba(231,76,60,0.5));
+}
 
 /* Envelope stack at home base */
 .home-stack {
@@ -389,10 +576,11 @@ input[type="text"]:focus { border-color: #5b8def; }
   position: absolute;
   width: 32px;
   height: 18px;
-  background: #f5f5dc;
-  border: 1px solid #ccc;
+  background: linear-gradient(135deg, #faf5e4, #f0ebd4);
+  border: 1px solid #d4c89a;
   border-radius: 2px;
   bottom: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 .home-stack-env::after {
   content: '';
@@ -401,7 +589,7 @@ input[type="text"]:focus { border-color: #5b8def; }
   height: 0;
   border-left: 16px solid transparent;
   border-right: 16px solid transparent;
-  border-top: 8px solid #e8e0c8;
+  border-top: 8px solid #e6dcc0;
 }
 .home-stack-env:nth-child(2) { bottom: 3px; left: 2px; }
 .home-stack-env:nth-child(3) { bottom: 6px; left: -1px; }
@@ -413,6 +601,7 @@ input[type="text"]:focus { border-color: #5b8def; }
   transition: none;
   pointer-events: none;
 }
+/* Leg swing */
 .walking-agent .a-leg.left,
 .walking-agent .a-leg.right {
   animation: legSwing .3s ease-in-out infinite alternate;
@@ -421,8 +610,20 @@ input[type="text"]:focus { border-color: #5b8def; }
   animation-delay: .15s;
 }
 @keyframes legSwing {
-  from { transform: rotate(-12deg); }
-  to { transform: rotate(12deg); }
+  from { transform: rotate(-15deg); }
+  to { transform: rotate(15deg); }
+}
+/* Arm swing while walking */
+.walking-agent .a-arm.left,
+.walking-agent .a-arm.right {
+  animation: armSwing .3s ease-in-out infinite alternate;
+}
+.walking-agent .a-arm.right {
+  animation-delay: .15s;
+}
+@keyframes armSwing {
+  from { transform: rotate(12deg); }
+  to { transform: rotate(-12deg); }
 }
 .walking-agent.face-left .agent-char {
   transform: scaleX(-1);
@@ -431,15 +632,16 @@ input[type="text"]:focus { border-color: #5b8def; }
 /* Carrying envelope */
 .walking-env {
   position: absolute;
-  top: 12px;
+  top: 14px;
   width: 24px;
   height: 16px;
-  background: #f5f5dc;
-  border: 1px solid #ccc;
+  background: linear-gradient(135deg, #faf5e4, #f0ebd4);
+  border: 1px solid #d4c89a;
   border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 .walking-agent.face-left .walking-env { right: -8px; }
-.walking-agent:not(.face-left) .walking-env { left: 34px; }
+.walking-agent:not(.face-left) .walking-env { left: 38px; }
 .walking-env::after {
   content: '';
   position: absolute;
@@ -447,7 +649,25 @@ input[type="text"]:focus { border-color: #5b8def; }
   height: 0;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-top: 7px solid #e8e0c8;
+  border-top: 7px solid #e6dcc0;
+}
+/* Envelope glow in agent color while carrying */
+.walking-agent.carrying[data-agent="S"] .walking-env { box-shadow: 0 2px 12px rgba(39,174,96,0.4); }
+.walking-agent.carrying[data-agent="W"] .walking-env { box-shadow: 0 2px 12px rgba(243,156,18,0.4); }
+.walking-agent.carrying[data-agent="O"] .walking-env { box-shadow: 0 2px 12px rgba(41,128,185,0.4); }
+.walking-agent.carrying[data-agent="T"] .walking-env { box-shadow: 0 2px 12px rgba(231,76,60,0.4); }
+
+/* Walking shadow on floor */
+.walking-agent::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 8px;
+  background: radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, transparent 70%);
+  border-radius: 50%;
 }
 
 /* Feed */
@@ -516,6 +736,17 @@ input[type="text"]:focus { border-color: #5b8def; }
 .agent-home.corner-bl .agent-char { animation-delay: 1s; }
 .agent-home.corner-br .agent-char { animation-delay: 1.5s; }
 
+/* Idle arm gentle sway */
+.agent-home .a-arm.left,
+.agent-home .a-arm.right {
+  animation: idleArmSway 2.5s ease-in-out infinite;
+}
+.agent-home .a-arm.right { animation-delay: .3s; }
+@keyframes idleArmSway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(5deg); }
+}
+
 /* Carrying bob animation */
 @keyframes carryBob {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
@@ -528,17 +759,17 @@ input[type="text"]:focus { border-color: #5b8def; }
 /* Speech bubbles — works on both .agent-home and .walking-agent */
 .speech-bubble {
   position: absolute;
-  top: -32px;
+  top: -38px;
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
   color: #111;
   font-size: 12px;
   font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 12px;
+  padding: 6px 14px;
+  border-radius: 14px;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.35);
   z-index: 50;
   animation: bubbleIn .3s ease forwards;
   pointer-events: none;
@@ -638,8 +869,13 @@ input[type="text"]:focus { border-color: #5b8def; }
     <div class="agent-home corner-tl" id="home-S">
       <div class="agent-counter" id="counter-S" style="color:#27ae60"></div>
       <div class="agent-char" id="char-S">
-        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
-        <div class="a-body" style="background:#27ae60"><span class="a-letter">S</span></div>
+        <div class="a-head">
+          <div class="a-eye left"></div><div class="a-eye right"></div>
+          <div class="a-mouth"></div>
+        </div>
+        <div class="a-body" style="background:linear-gradient(180deg,#2ecc71,#27ae60)"><span class="a-letter">S</span></div>
+        <div class="a-arm left" style="background:#27ae60"></div>
+        <div class="a-arm right" style="background:#27ae60"></div>
         <div class="a-legs">
           <div class="a-leg left" style="background:#27ae60"></div>
           <div class="a-leg right" style="background:#27ae60"></div>
@@ -659,8 +895,13 @@ input[type="text"]:focus { border-color: #5b8def; }
     <div class="agent-home corner-tr" id="home-W">
       <div class="agent-counter" id="counter-W" style="color:#f39c12"></div>
       <div class="agent-char" id="char-W">
-        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
-        <div class="a-body" style="background:#f39c12"><span class="a-letter">W</span></div>
+        <div class="a-head">
+          <div class="a-eye left"></div><div class="a-eye right"></div>
+          <div class="a-mouth"></div>
+        </div>
+        <div class="a-body" style="background:linear-gradient(180deg,#f5ab35,#f39c12)"><span class="a-letter">W</span></div>
+        <div class="a-arm left" style="background:#f39c12"></div>
+        <div class="a-arm right" style="background:#f39c12"></div>
         <div class="a-legs">
           <div class="a-leg left" style="background:#f39c12"></div>
           <div class="a-leg right" style="background:#f39c12"></div>
@@ -680,8 +921,13 @@ input[type="text"]:focus { border-color: #5b8def; }
     <div class="agent-home corner-bl" id="home-O">
       <div class="agent-counter" id="counter-O" style="color:#2980b9"></div>
       <div class="agent-char" id="char-O">
-        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
-        <div class="a-body" style="background:#2980b9"><span class="a-letter">O</span></div>
+        <div class="a-head">
+          <div class="a-eye left"></div><div class="a-eye right"></div>
+          <div class="a-mouth"></div>
+        </div>
+        <div class="a-body" style="background:linear-gradient(180deg,#3498db,#2980b9)"><span class="a-letter">O</span></div>
+        <div class="a-arm left" style="background:#2980b9"></div>
+        <div class="a-arm right" style="background:#2980b9"></div>
         <div class="a-legs">
           <div class="a-leg left" style="background:#2980b9"></div>
           <div class="a-leg right" style="background:#2980b9"></div>
@@ -701,8 +947,13 @@ input[type="text"]:focus { border-color: #5b8def; }
     <div class="agent-home corner-br" id="home-T">
       <div class="agent-counter" id="counter-T" style="color:#e74c3c"></div>
       <div class="agent-char" id="char-T">
-        <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
-        <div class="a-body" style="background:#e74c3c"><span class="a-letter">T</span></div>
+        <div class="a-head">
+          <div class="a-eye left"></div><div class="a-eye right"></div>
+          <div class="a-mouth"></div>
+        </div>
+        <div class="a-body" style="background:linear-gradient(180deg,#ec7063,#e74c3c)"><span class="a-letter">T</span></div>
+        <div class="a-arm left" style="background:#e74c3c"></div>
+        <div class="a-arm right" style="background:#e74c3c"></div>
         <div class="a-legs">
           <div class="a-leg left" style="background:#e74c3c"></div>
           <div class="a-leg right" style="background:#e74c3c"></div>
@@ -721,7 +972,7 @@ input[type="text"]:focus { border-color: #5b8def; }
     <!-- Center Mailbox -->
     <div class="mailbox" id="mailbox">
       <div class="envelope-stack" id="envelope-stack"></div>
-      <div class="mailbox-icon">
+      <div class="mailbox-icon" id="mailbox-icon">
         <div class="mailbox-flag" id="mailbox-flag"></div>
       </div>
       <div class="mailbox-label">Inkorg</div>
@@ -842,11 +1093,18 @@ if (isAdmin) {
   const panel = document.getElementById('animation-panel');
   const envelopeStack = document.getElementById('envelope-stack');
   const mailboxFlag = document.getElementById('mailbox-flag');
+  const mailboxIcon = document.getElementById('mailbox-icon');
 
   const agentColors = { S: '#27ae60', W: '#f39c12', O: '#2980b9', T: '#e74c3c' };
+  const agentGradients = {
+    S: 'linear-gradient(180deg,#2ecc71,#27ae60)',
+    W: 'linear-gradient(180deg,#f5ab35,#f39c12)',
+    O: 'linear-gradient(180deg,#3498db,#2980b9)',
+    T: 'linear-gradient(180deg,#ec7063,#e74c3c)',
+  };
   const agentCounts = { S: 0, W: 0, O: 0, T: 0 };
-  let mailboxEnvelopes = 0; // track envelopes in the stack
-  const activeWalkers = {}; // letter -> walker element, tracks walking agents
+  let mailboxEnvelopes = 0;
+  const activeWalkers = {};
   const bgMusic = document.getElementById('bg-music');
   let musicPlayed = false;
 
@@ -895,10 +1153,16 @@ if (isAdmin) {
   }
 
   function updateCounts() {
-    document.getElementById('count-s').textContent = counts.S;
-    document.getElementById('count-w').textContent = counts.W;
-    document.getElementById('count-o').textContent = counts.O;
-    document.getElementById('count-t').textContent = counts.T;
+    ['S', 'W', 'O', 'T'].forEach(l => {
+      const el = document.getElementById('count-' + l.toLowerCase());
+      const oldVal = parseInt(el.textContent) || 0;
+      el.textContent = counts[l];
+      if (counts[l] > oldVal) {
+        el.classList.remove('pulse');
+        void el.offsetWidth; // reflow to restart animation
+        el.classList.add('pulse');
+      }
+    });
   }
 
   function updateAgentCounter(letter) {
@@ -918,6 +1182,11 @@ if (isAdmin) {
     env.className = 'env-in-stack';
     envelopeStack.appendChild(env);
     mailboxFlag.classList.add('has-mail');
+    // Pulse the mailbox
+    mailboxIcon.classList.add('has-mail-glow');
+    mailboxIcon.classList.remove('pulse');
+    void mailboxIcon.offsetWidth;
+    mailboxIcon.classList.add('pulse');
   }
 
   function removeEnvelopeFromMailbox() {
@@ -927,6 +1196,7 @@ if (isAdmin) {
     if (last) last.remove();
     if (mailboxEnvelopes <= 0) {
       mailboxFlag.classList.remove('has-mail');
+      mailboxIcon.classList.remove('has-mail-glow');
     }
   }
 
@@ -977,10 +1247,8 @@ if (isAdmin) {
 
   // --- Speech Bubbles ---
   function showSpeechBubble(agentLetter, text) {
-    // Attach to walking agent if one exists, otherwise to home base
     const target = activeWalkers[agentLetter] || document.getElementById('home-' + agentLetter);
     if (!target) return;
-    // Remove existing bubble on this target
     const existing = target.querySelector('.speech-bubble');
     if (existing) existing.remove();
 
@@ -990,7 +1258,6 @@ if (isAdmin) {
     bubble.dataset.agent = agentLetter;
     target.appendChild(bubble);
 
-    // Fade out after 3.5s
     setTimeout(() => {
       if (bubble.parentNode) {
         bubble.classList.add('fade-out');
@@ -999,7 +1266,6 @@ if (isAdmin) {
     }, 3500);
   }
 
-  // Transfer speech bubble from home to walker or vice versa
   function transferBubble(agentLetter, fromEl, toEl) {
     const bubble = fromEl.querySelector(`.speech-bubble[data-agent="${agentLetter}"]`);
     if (bubble && toEl) {
@@ -1025,7 +1291,7 @@ if (isAdmin) {
         const agent = agents[Math.floor(Math.random() * agents.length)];
         const line = idleLines[Math.floor(Math.random() * idleLines.length)];
         showSpeechBubble(agent, line);
-        lastSubmissionTime = Date.now(); // reset so next idle is 10s later
+        lastSubmissionTime = Date.now();
       }
     }, 5000);
   }
@@ -1040,10 +1306,8 @@ if (isAdmin) {
   };
 
   // --- Walking Animation (concurrent, per-agent) ---
-  // Each agent can have a pending queue of submission IDs
   const agentQueues = { S: [], W: [], O: [], T: [] };
   const agentBusy = { S: false, W: false, O: false, T: false };
-  // Track abort callbacks per agent
   const agentAbort = { S: null, W: null, O: null, T: null };
 
   function triggerDelivery(id, swotLetter) {
@@ -1063,70 +1327,70 @@ if (isAdmin) {
     animateAgentPickup(letter, submissionId);
   }
 
+  function createWalkerHTML(letter) {
+    return `
+      <div class="agent-char">
+        <div class="a-head">
+          <div class="a-eye left"></div><div class="a-eye right"></div>
+          <div class="a-mouth"></div>
+        </div>
+        <div class="a-body" style="background:${agentGradients[letter]}"><span class="a-letter">${letter}</span></div>
+        <div class="a-arm left" style="background:${agentColors[letter]}"></div>
+        <div class="a-arm right" style="background:${agentColors[letter]}"></div>
+        <div class="a-legs">
+          <div class="a-leg left" style="background:${agentColors[letter]}"></div>
+          <div class="a-leg right" style="background:${agentColors[letter]}"></div>
+          <div class="a-foot left"></div>
+          <div class="a-foot right"></div>
+        </div>
+      </div>
+    `;
+  }
+
   function animateAgentPickup(letter, submissionId) {
     const homeEl = document.getElementById('home-' + letter);
     const charEl = document.getElementById('char-' + letter);
     const mailbox = document.getElementById('mailbox');
 
-    // Get positions
     const panelRect = panel.getBoundingClientRect();
     const homeRect = homeEl.getBoundingClientRect();
     const mailboxRect = mailbox.getBoundingClientRect();
 
-    // Use home element center for start (in case char is hidden from previous walk)
-    const startX = homeRect.left - panelRect.left + homeRect.width / 2 - 20;
+    const startX = homeRect.left - panelRect.left + homeRect.width / 2 - 22;
     const startY = homeRect.top - panelRect.top;
 
-    // Mailbox center position
-    const mailboxX = mailboxRect.left - panelRect.left + mailboxRect.width / 2 - 20;
+    const mailboxX = mailboxRect.left - panelRect.left + mailboxRect.width / 2 - 22;
     const mailboxY = mailboxRect.top - panelRect.top - 10;
 
     const goingRight = mailboxX > startX;
 
     charEl.style.visibility = 'hidden';
 
-    // Reuse existing walker or create new one
     let walker = activeWalkers[letter];
-    let walkerIsNew = false;
     if (!walker || !walker.parentNode) {
       walker = document.createElement('div');
       walker.className = 'walking-agent' + (goingRight ? '' : ' face-left');
-      walker.innerHTML = `
-        <div class="agent-char">
-          <div class="a-head"><div class="a-eye left"></div><div class="a-eye right"></div></div>
-          <div class="a-body" style="background:${agentColors[letter]}"><span class="a-letter">${letter}</span></div>
-          <div class="a-legs">
-            <div class="a-leg left" style="background:${agentColors[letter]}"></div>
-            <div class="a-leg right" style="background:${agentColors[letter]}"></div>
-            <div class="a-foot left"></div>
-            <div class="a-foot right"></div>
-          </div>
-        </div>
-      `;
+      walker.dataset.agent = letter;
+      walker.innerHTML = createWalkerHTML(letter);
       walker.style.left = startX + 'px';
       walker.style.top = startY + 'px';
       panel.appendChild(walker);
       activeWalkers[letter] = walker;
       transferBubble(letter, homeEl, walker);
-      walkerIsNew = true;
     } else {
-      // Abort current walk — the walker stays where it is
       if (agentAbort[letter]) {
         agentAbort[letter]();
         agentAbort[letter] = null;
       }
-      // Remove carried envelope if any (it was from previous delivery — count it)
       const oldEnv = walker.querySelector('.walking-env');
       if (oldEnv) {
         oldEnv.remove();
         walker.classList.remove('carrying');
-        // The previous delivery's envelope goes home
         agentCounts[letter]++;
         updateAgentCounter(letter);
       }
     }
 
-    // Very leisurely stroll
     const walkDuration = 4500;
     let aborted = false;
 
@@ -1140,6 +1404,7 @@ if (isAdmin) {
       const facingRight = targetX > sx;
       const isCarrying = walker.classList.contains('carrying');
       walker.className = 'walking-agent' + (facingRight ? '' : ' face-left') + (isCarrying ? ' carrying' : '');
+      walker.dataset.agent = letter;
       const wStart = performance.now();
       function step(now) {
         if (aborted) return;
@@ -1157,10 +1422,8 @@ if (isAdmin) {
       requestAnimationFrame(step);
     }
 
-    // Set abort callback
     agentAbort[letter] = () => { aborted = true; };
 
-    // Walk to mailbox
     walkTo(mailboxX, mailboxY, walkDuration, () => {
       if (aborted) return;
       removeEnvelopeFromMailbox();
@@ -1173,8 +1436,8 @@ if (isAdmin) {
 
       const facingRight2 = startX > mailboxX;
       walker.className = 'walking-agent' + (facingRight2 ? '' : ' face-left') + ' carrying';
+      walker.dataset.agent = letter;
 
-      // Set new abort for return walk
       agentAbort[letter] = () => { aborted = true; };
 
       setTimeout(() => {
@@ -1208,19 +1471,18 @@ if (isAdmin) {
     mailboxEnvelopes = 0;
     envelopeStack.innerHTML = '';
     mailboxFlag.classList.remove('has-mail');
+    mailboxIcon.classList.remove('has-mail-glow');
 
     let unclassifiedCount = 0;
     s.submissions.forEach((sub) => {
       if (sub.classification) {
         counts[sub.classification.swot]++;
         agentCounts[sub.classification.swot]++;
-        // Don't add classified items to feed (they've been picked up)
       } else {
         addFeedItem(sub.id, sub.text, null);
         unclassifiedCount++;
       }
     });
-    // Add unclassified as envelopes
     for (let i = 0; i < unclassifiedCount; i++) addEnvelopeToMailbox();
 
     ['S','W','O','T'].forEach(l => updateAgentCounter(l));
@@ -1241,6 +1503,7 @@ if (isAdmin) {
     resetIdleTimer();
     envelopeStack.innerHTML = '';
     mailboxFlag.classList.remove('has-mail');
+    mailboxIcon.classList.remove('has-mail-glow');
     ['S','W','O','T'].forEach(l => updateAgentCounter(l));
     updateCounts();
     updateTimerUI();
@@ -1249,7 +1512,6 @@ if (isAdmin) {
   socket.on('session:stopped', () => {
     sessionActive = false;
     updateTimerUI();
-    // Stop and reset music
     bgMusic.pause();
     bgMusic.currentTime = 0;
   });
@@ -1259,7 +1521,6 @@ if (isAdmin) {
     timeRemaining = d.timeRemaining;
     totalDuration = d.totalDuration;
     updateTimerUI();
-    // Play background music on first submission
     if (!musicPlayed) {
       musicPlayed = true;
       bgMusic.play().catch(() => {});
@@ -1274,7 +1535,6 @@ if (isAdmin) {
   socket.on('timer:ended', () => {
     timeRemaining = 0;
     updateTimerUI();
-    // All agents get closing lines
     if (idleTimer) clearInterval(idleTimer);
     Object.entries(timerEndLines).forEach(([agent, line], i) => {
       setTimeout(() => showSpeechBubble(agent, line), i * 600);
@@ -1288,11 +1548,9 @@ if (isAdmin) {
   });
 
   socket.on('submission:classified', (d) => {
-    // Update feed item with classification badge briefly before removal
     addFeedItem(d.id, d.text, d.classification);
     counts[d.classification.swot]++;
     updateCounts();
-    // Trigger agent walk animation (which removes from feed)
     triggerDelivery(d.id, d.classification.swot);
   });
 
@@ -1303,7 +1561,6 @@ if (isAdmin) {
   });
 
   socket.on('speech:argument', (d) => {
-    // Show argument lines staggered — two agents bickering
     d.lines.forEach((line, i) => {
       setTimeout(() => showSpeechBubble(line.agent, line.text), i * 1200);
     });
